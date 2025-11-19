@@ -48,7 +48,7 @@ export default function Header() {
         {/* LEFT SIDE — Logo */}
         <div>
           <Link href="/" className="text-xl font-bold text-green-700 hover:text-green-800 transition-colors">
-            🌱 Re-Fashion
+            Re-Fashion
           </Link>
         </div>
 
@@ -62,15 +62,17 @@ export default function Header() {
         </div>
 
         {/* RIGHT SIDE — Icons */}
-        <div className="flex items-center space-x-6 text-2xl">
+        <div className="flex items-center space-x-4">
           {/* Favorite */}
           <button
             type="button"
             aria-label="Favoriten"
             onClick={() => handleNavigation('/favorites')}
-            className="bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-green-500 rounded text-green-600 hover:text-green-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            💚
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
           </button>
 
           {/* Messages */}
@@ -78,9 +80,11 @@ export default function Header() {
             type="button"
             aria-label="Nachrichten"
             onClick={() => handleNavigation('/messages')}
-            className="bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-green-500 rounded text-green-600 hover:text-green-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            💬
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
           </button>
 
           {/* Cart */}
@@ -88,9 +92,15 @@ export default function Header() {
             type="button"
             aria-label="Warenkorb"
             onClick={() => handleNavigation('/cart')}
-            className="bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-green-500 rounded text-green-600 hover:text-green-800 transition-colors"
+            className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 relative"
           >
-            🛒
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>
+            {/* Cart item count badge - optional, can be shown when there are items */}
+            {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+              3
+            </span> */}
           </button>
 
           {/* Profile */}
@@ -105,9 +115,11 @@ export default function Header() {
                   handleNavigation('/profile');
                 }
               }}
-              className="bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-green-500 rounded text-green-600 hover:text-green-800 transition-colors"
+              className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              🧑
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </button>
 
             {/* Profile Dropdown Menu */}
