@@ -3,39 +3,126 @@ export default function Home() {
   return (
     <div className="bg-white">
       
-      {/* HERO SECTION - Modern Fashion Style */}
+      {/* HERO SECTION - Ultra Modern Fashion Style */}
       <section className="relative h-screen bg-gradient-to-br from-gray-900 via-green-900 to-black overflow-hidden">
-        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
+        
+        {/* Multiple animated gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-500/20 to-transparent animate-pulse"></div>
+        <div className="absolute inset-0 bg-gradient-to-l from-emerald-400/10 via-transparent to-green-600/10 animate-pulse" style={{animationDelay: '1s'}}></div>
+        
+        {/* Floating sustainability symbols */}
+        {/* Recycling symbol */}
+        <div className="absolute top-10 left-10 w-8 h-8 opacity-20 animate-pulse" style={{animationDelay: '0.5s'}}>
+          <svg fill="currentColor" className="text-green-400" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 15L7 13.5l1.41-1.41 2.09 2.09 4.59-4.59L16.5 11 10.5 17z"/>
+          </svg>
+        </div>
+        
+        {/* Eco leaf */}
+        <div className="absolute top-32 right-24 w-6 h-6 opacity-30 animate-bounce" style={{animationDelay: '2s'}}>
+          <svg fill="currentColor" className="text-emerald-400" viewBox="0 0 24 24">
+            <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+          </svg>
+        </div>
+        
+        {/* Cotton/fabric symbol */}
+        <div className="absolute bottom-40 left-16 w-10 h-10 opacity-25 animate-pulse" style={{animationDelay: '1.5s'}}>
+          <svg fill="currentColor" className="text-white" viewBox="0 0 24 24">
+            <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"/>
+          </svg>
+        </div>
+        
+        {/* Heart for sustainable love */}
+        <div className="absolute top-20 right-12 w-6 h-6 opacity-30 animate-ping" style={{animationDelay: '3s'}}>
+          <svg fill="currentColor" className="text-green-300" viewBox="0 0 24 24">
+            <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5 2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"/>
+          </svg>
+        </div>
+        
         <div className="relative z-10 flex items-center justify-center h-full px-4">
           <div className="text-center text-white max-w-4xl">
-            <h1 className="text-7xl md:text-8xl font-thin tracking-wide mb-8">
-              RE-FASHION
-            </h1>
-            <p className="text-xl md:text-2xl font-light mb-12 tracking-wider opacity-90">
-              Sustainable Fashion. Conscious Choices. Timeless Style.
+            {/* Title with advanced animations */}
+            <div className="relative mb-8">
+              <h1 className="text-7xl md:text-8xl font-thin tracking-wide animate-pulse hover:animate-none transition-all duration-1000 transform hover:scale-105 relative z-10">
+                RE-FASHION
+              </h1>
+              {/* Eco-friendly shadow effect */}
+              <h1 className="absolute top-0 left-0 text-7xl md:text-8xl font-thin tracking-wide text-emerald-400/40 transform translate-x-1 translate-y-1 -z-10">
+                RE-FASHION
+              </h1>
+            </div>
+            
+            {/* Subtitle with typewriter effect simulation */}
+            <p className="text-xl md:text-2xl font-light mb-12 tracking-wider opacity-0 animate-pulse transition-all duration-2000 hover:opacity-100" style={{animationDelay: '0.5s', opacity: 0.9}}>
+              <span className="inline-block animate-pulse" style={{animationDelay: '0.8s'}}>Sustainable</span>{' '}
+              <span className="inline-block animate-pulse" style={{animationDelay: '1.2s'}}>Fashion.</span>{' '}
+              <span className="inline-block animate-pulse" style={{animationDelay: '1.6s'}}>Conscious</span>{' '}
+              <span className="inline-block animate-pulse" style={{animationDelay: '2.0s'}}>Choices.</span>{' '}
+              <span className="inline-block animate-pulse" style={{animationDelay: '2.4s'}}>Timeless</span>{' '}
+              <span className="inline-block animate-pulse" style={{animationDelay: '2.8s'}}>Style.</span>
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center" style={{animationDelay: '3.2s'}}>
+              {/* Premium Shop Now Button */}
               <a
                 href="/register"
-                className="px-12 py-4 bg-white text-black font-medium tracking-wider hover:bg-gray-100 transition-all duration-300 uppercase text-sm"
+                className="group relative px-12 py-4 bg-white text-black font-medium tracking-wider transition-all duration-700 uppercase text-sm overflow-hidden hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25 rounded-sm"
               >
-                Shop Now
+                {/* Glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-500 opacity-0 group-hover:opacity-75 transition-opacity duration-700 blur-sm rounded-sm"></div>
+                
+                <span className="relative z-20">Shop Now</span>
+                
+                {/* Sliding gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left"></div>
+                
+                {/* White text overlay */}
+                <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-30 font-medium tracking-wider uppercase text-sm">Shop Now</span>
+                
+                {/* Sustainable sparkle effects */}
+                <div className="absolute top-2 right-2 w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity duration-500 animate-ping">
+                  <svg fill="currentColor" className="text-white" viewBox="0 0 24 24">
+                    <path d="M12,2L13.09,8.26L20,7L14.74,12.5L20,18L13.09,16.74L12,23L10.91,16.74L4,18L9.26,12.5L4,7L10.91,8.26L12,2Z"/>
+                  </svg>
+                </div>
+                <div className="absolute bottom-2 left-2 w-2 h-2 opacity-0 group-hover:opacity-40 transition-opacity duration-500 animate-pulse" style={{animationDelay: '0.3s'}}>
+                  <div className="w-full h-full bg-emerald-200 rounded-full"></div>
+                </div>
               </a>
+              
+              {/* Premium Discover Button */}
               <a
                 href="#collection"
-                className="px-12 py-4 border border-white text-white font-medium tracking-wider hover:bg-white hover:text-black transition-all duration-300 uppercase text-sm"
+                className="group relative px-12 py-4 border-2 border-white text-white font-medium tracking-wider transition-all duration-700 uppercase text-sm overflow-hidden hover:scale-110 hover:shadow-2xl hover:shadow-white/25 backdrop-blur-sm rounded-sm"
               >
-                Discover
+                {/* Outer glow */}
+                <div className="absolute -inset-2 bg-white/20 opacity-0 group-hover:opacity-50 transition-opacity duration-700 blur-lg rounded-sm"></div>
+                
+                <span className="relative z-20 group-hover:text-black transition-colors duration-700">Discover</span>
+                
+                {/* Fill animation */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-gray-100 to-white transform scale-y-0 group-hover:scale-y-100 transition-transform duration-700 origin-bottom"></div>
+                
+                {/* Border glow effect */}
+                <div className="absolute inset-0 border-2 border-green-400/0 group-hover:border-green-400/60 transition-colors duration-700 rounded-sm"></div>
               </a>
             </div>
           </div>
         </div>
 
-        {/* Animated background elements */}
-        <div className="absolute top-20 right-20 w-32 h-32 bg-green-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 left-20 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-10 w-20 h-20 bg-white/10 rounded-full blur-2xl animate-bounce delay-500"></div>
+        {/* Sustainable background elements */}
+        {/* Organic shapes representing nature */}
+        <div className="absolute top-20 right-20 w-32 h-32 bg-green-500/20 rounded-full blur-3xl animate-pulse" style={{clipPath: 'ellipse(60% 40% at 50% 50%)'}}></div>
+        <div className="absolute bottom-20 left-20 w-48 h-48 bg-emerald-500/15 blur-3xl animate-pulse delay-1000" style={{borderRadius: '60% 40% 40% 60%'}}></div>
+        <div className="absolute top-1/2 left-10 w-20 h-20 bg-white/15 blur-2xl animate-bounce delay-500" style={{borderRadius: '50% 70% 30% 50%'}}></div>
+        
+        {/* Subtle leaf patterns */}
+        <div className="absolute top-1/3 right-1/4 opacity-5 animate-pulse">
+          <svg width="60" height="60" fill="currentColor" className="text-green-400">
+            <path d="M30,5C15,10 10,25 5,35L8,36L10,32C12,33 15,33 18,33C35,33 40,5 40,5C38,8 25,8 15,10C5,12 2,20 2,25C2,30 5,35 5,35C15,15 30,5 30,5Z"/>
+          </svg>
+        </div>
         
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
