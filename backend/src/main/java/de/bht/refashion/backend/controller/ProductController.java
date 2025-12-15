@@ -1,155 +1,74 @@
 package de.bht.refashion.backend.controller;
 
-import de.bht.refashion.backend.dto.ProductRequest;
+import de.bht.refashion.backend.dto.CreateProductRequest;
+import de.bht.refashion.backend.model.Category;
 import de.bht.refashion.backend.model.Product;
-import de.bht.refashion.backend.model.User;
-import de.bht.refashion.backend.service.ProductService;
-import de.bht.refashion.backend.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import de.bht.refashion.backend.repository.CategoryRepository;
+import de.bht.refashion.backend.repository.ProductRepository;
+import de.bht.refashion.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class ProductController {
 
-    private final ProductService productService;
-    private final UserService userService;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+
+    public ProductController(ProductRepository productRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+    }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    public List<Product> all() {
+        return productRepository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Integer id) {
-        return productService.getProductById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Product> get(@PathVariable Long id) {
+        return productRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/my-products")
-    public ResponseEntity<List<Product>> getMyProducts(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String email = authentication.getName();
-        Optional<User> user = userService.findByEmail(email);
-        
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        List<Product> products = productService.getProductsByOwner(user.get());
-        return ResponseEntity.ok(products);
-    }
-
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Integer categoryId) {
-        try {
-            // We need to get the category first
-            var categoryOpt = productService.getProductById(categoryId); // This is wrong, let's fix it
-            // For now, let's return all products and filter on frontend
-            List<Product> products = productService.getAllProducts();
-            return ResponseEntity.ok(products);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProducts(@RequestParam String title) {
-        List<Product> products = productService.searchProductsByTitle(title);
-        return ResponseEntity.ok(products);
+    @GetMapping("/category/{name}")
+    public List<Product> byCategory(@PathVariable String name) {
+        return productRepository.findByCategory_Name(name);
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody ProductRequest productRequest, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<?> create(@RequestBody CreateProductRequest req) {
+        Category category = null;
+        if (req.categoryId != null) {
+            category = categoryRepository.findById(req.categoryId).orElse(null);
         }
 
-        String email = authentication.getName();
-        Optional<User> user = userService.findByEmail(email);
-        
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        var ownerOpt = userRepository.findById(req.ownerId == null ? -1L : req.ownerId);
+        if (req.ownerId != null && ownerOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Owner not found");
         }
 
-        try {
-            Product product = Product.builder()
-                    .title(productRequest.getTitle())
-                    .description(productRequest.getDescription())
-                    .price(productRequest.getPrice())
-                    .size(productRequest.getSize())
-                    .condition(productRequest.getCondition())
-                    .imageUrl(productRequest.getImageUrl())
-                    .build();
+        Product p = new Product();
+        p.setTitle(req.title);
+        p.setDescription(req.description);
+        p.setPrice(req.price);
+        p.setSize(req.size);
+        p.setCondition(req.condition);
+        p.setImageUrl(req.imageUrl);
+        p.setCategory(category);
+        ownerOpt.ifPresent(p::setOwner);
 
-            Product savedProduct = productService.createProduct(product, user.get(), productRequest.getCategoryId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        Product saved = productRepository.save(p);
+        URI location = URI.create("/api/products/" + saved.getId());
+        if (location != null) {
+            return ResponseEntity.created(location).body(saved);
         }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Integer id, @RequestBody ProductRequest productRequest, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String email = authentication.getName();
-        Optional<User> user = userService.findByEmail(email);
-        
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            Product updatedProduct = Product.builder()
-                    .title(productRequest.getTitle())
-                    .description(productRequest.getDescription())
-                    .price(productRequest.getPrice())
-                    .size(productRequest.getSize())
-                    .condition(productRequest.getCondition())
-                    .imageUrl(productRequest.getImageUrl())
-                    .build();
-
-            Product savedProduct = productService.updateProduct(id, updatedProduct, user.get());
-            return ResponseEntity.ok(savedProduct);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String email = authentication.getName();
-        Optional<User> user = userService.findByEmail(email);
-        
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            productService.deleteProduct(id, user.get());
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        return ResponseEntity.ok(saved);
     }
 }

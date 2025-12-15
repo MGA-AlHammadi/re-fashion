@@ -1,5 +1,5 @@
-export default function CategoryPage({ params }: { params: { category: string } }) {
-  const displayName = params.category.replace(/-/g, ' ').toUpperCase();
+export default function CategoryPage({ params }: { readonly params: { readonly category: string } }) {
+  const displayName = params.category.replaceAll('-', ' ').toUpperCase();
 
   return (
     <div className="min-h-screen bg-white py-24">

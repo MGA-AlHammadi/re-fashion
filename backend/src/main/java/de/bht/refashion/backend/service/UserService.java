@@ -13,6 +13,7 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    private static final String USER_NOT_FOUND = "User not found";
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final JwtUtil jwtUtil;
@@ -28,7 +29,7 @@ public class UserService {
       
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
-            throw new RuntimeException("E-Mail existiert bereits!");
+            throw new IllegalArgumentException("E-Mail existiert bereits!");
         }
 
         
@@ -39,12 +40,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-     public String login(String email, String password) {
+    public String login(String email, String password) {
         var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new IllegalArgumentException("Invalid password");
         }
 
         return jwtUtil.generateToken(email);
@@ -52,12 +53,12 @@ public class UserService {
 
     public User getUserProfile(String token) {
         if (!jwtUtil.validateToken(token)) {
-            throw new RuntimeException("Invalid token");
+            throw new IllegalArgumentException("Invalid token");
         }
         
         String email = jwtUtil.extractEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
         
         // Remove password from response for security
         user.setPassword(null);
@@ -66,12 +67,12 @@ public class UserService {
 
     public User updateUserProfile(String token, User updateRequest) {
         if (!jwtUtil.validateToken(token)) {
-            throw new RuntimeException("Invalid token");
+            throw new IllegalArgumentException("Invalid token");
         }
         
         String email = jwtUtil.extractEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
         
         // Update allowed fields
         if (updateRequest.getName() != null && !updateRequest.getName().trim().isEmpty()) {
@@ -92,12 +93,12 @@ public class UserService {
 
     public User updateProfileImage(String token, String imageUrl) {
         if (!jwtUtil.validateToken(token)) {
-            throw new RuntimeException("Invalid token");
+            throw new IllegalArgumentException("Invalid token");
         }
         
         String email = jwtUtil.extractEmail(token);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
         
         user.setProfileImageUrl(imageUrl);
         User savedUser = userRepository.save(user);
