@@ -49,4 +49,59 @@ public class UserService {
 
         return jwtUtil.generateToken(email);
     }
+
+    public User getUserProfile(String token) {
+        if (!jwtUtil.validateToken(token)) {
+            throw new RuntimeException("Invalid token");
+        }
+        
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Remove password from response for security
+        user.setPassword(null);
+        return user;
+    }
+
+    public User updateUserProfile(String token, User updateRequest) {
+        if (!jwtUtil.validateToken(token)) {
+            throw new RuntimeException("Invalid token");
+        }
+        
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Update allowed fields
+        if (updateRequest.getName() != null && !updateRequest.getName().trim().isEmpty()) {
+            user.setName(updateRequest.getName());
+        }
+        if (updateRequest.getCity() != null) {
+            user.setCity(updateRequest.getCity());
+        }
+        if (updateRequest.getProfileImageUrl() != null) {
+            user.setProfileImageUrl(updateRequest.getProfileImageUrl());
+        }
+        
+        User savedUser = userRepository.save(user);
+        // Remove password from response for security
+        savedUser.setPassword(null);
+        return savedUser;
+    }
+
+    public User updateProfileImage(String token, String imageUrl) {
+        if (!jwtUtil.validateToken(token)) {
+            throw new RuntimeException("Invalid token");
+        }
+        
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setProfileImageUrl(imageUrl);
+        User savedUser = userRepository.save(user);
+        savedUser.setPassword(null);
+        return savedUser;
+    }
 }

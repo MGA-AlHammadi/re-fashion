@@ -27,6 +27,8 @@ public class User {
 
     private String city;
 
+    private String profileImageUrl;
+
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }

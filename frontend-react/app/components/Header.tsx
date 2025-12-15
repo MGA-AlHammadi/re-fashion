@@ -112,7 +112,7 @@ export default function Header() {
                 if (isLoggedIn) {
                   setShowProfileMenu(!showProfileMenu);
                 } else {
-                  handleNavigation('/profile');
+                  router.push('/login');
                 }
               }}
               className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
