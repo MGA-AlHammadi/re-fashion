@@ -1,4 +1,6 @@
 
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <div className="bg-white">
@@ -66,7 +68,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center" style={{animationDelay: '3.2s'}}>
               {/* Premium Shop Now Button */}
               <a
-                href="/register"
+                href="/collections"
                 className="group relative px-12 py-4 bg-white text-black font-medium tracking-wider transition-all duration-700 uppercase text-sm overflow-hidden hover:scale-110 hover:shadow-2xl hover:shadow-green-500/25 rounded-sm"
               >
                 {/* Glow effect */}
@@ -229,7 +231,7 @@ export default function Home() {
                 textColor: "text-slate-800"
               }
             ].map((category) => (
-              <div key={category.title} className="group cursor-pointer">
+              <Link key={category.title} href={`/collections/${category.title.toLowerCase()}`} className="group cursor-pointer">
                 <div className="relative overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-500 rounded-xl">
                   {/* Image placeholder with gradient */}
                   <div className={`h-80 ${category.image} flex items-end p-6 group-hover:scale-105 transition-transform duration-500`}>
@@ -250,75 +252,13 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FEATURED PRODUCTS SHOWCASE */}
-      <section className="py-24 bg-gradient-to-r from-green-50 via-white to-green-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-thin tracking-wide text-gray-900 mb-6">
-              TRENDING NOW
-            </h2>
-            <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto">
-              Discover our most loved sustainable pieces, handpicked for conscious fashion lovers
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Organic Cotton Basics",
-                price: "Ab 29€",
-                badge: "Bestseller",
-                color: "bg-gradient-to-br from-blue-100 to-blue-200"
-              },
-              {
-                title: "Recycled Denim Collection",
-                price: "Ab 89€",
-                badge: "New",
-                color: "bg-gradient-to-br from-indigo-100 to-purple-200"
-              },
-              {
-                title: "Eco-Friendly Sneakers",
-                price: "Ab 120€",
-                badge: "Limited",
-                color: "bg-gradient-to-br from-green-100 to-emerald-200"
-              }
-            ].map((item, index) => (
-              <div key={item.title} className="group cursor-pointer transform hover:scale-105 transition-all duration-300">
-                <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
-                  <div className={`h-64 ${item.color} flex items-center justify-center relative`}>
-                    {/* Product placeholder */}
-                    <div className="w-32 h-32 bg-white/30 rounded-full backdrop-blur-sm flex items-center justify-center">
-                      <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </div>
-                    
-                    {/* Badge */}
-                    <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {item.badge}
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 bg-white">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-2xl font-bold text-green-600">
-                      {item.price}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* TRENDING NOW section removed per request */}
 
       {/* SUSTAINABILITY STATEMENT - Minimalist */}
       <section className="py-24 bg-white">
