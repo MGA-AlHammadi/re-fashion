@@ -34,6 +34,9 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> get(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return productRepository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 

@@ -54,7 +54,20 @@ export default function CartPage() {
 
   if (loading) return <div className="p-6">Lade Warenkorb…</div>;
   if (error) return <div className="p-6 text-red-600">Fehler: {error}</div>;
-  if (items.length === 0) return <div className="p-6">Dein Warenkorb ist leer.</div>;
+  if (items.length === 0)
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <h1 className="text-2xl mb-4">Warenkorb</h1>
+        <div className="border rounded p-8 bg-gray-50">
+          <div className="text-4xl">🛒</div>
+          <p className="mt-4">Dein Warenkorb ist leer.</p>
+          <p className="mt-2 text-sm text-gray-600">Füge Produkte hinzu oder durchsuche unsere Kollektionen.</p>
+          <div className="mt-4">
+            <Link href="/collections" className="inline-block px-4 py-2 bg-green-600 text-white rounded">Weiter einkaufen</Link>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -75,6 +88,15 @@ export default function CartPage() {
           </li>
         ))}
       </ul>
+      <div className="mt-6 p-4 border rounded bg-white shadow-sm">
+        <div className="flex justify-between items-center">
+          <div className="text-lg font-semibold">Zwischensumme</div>
+          <div className="text-lg">{items.reduce((s, it: any) => s + (Number(it.product.price) || 0) * (it.quantity || 0), 0).toFixed(2)} €</div>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button className="px-4 py-2 bg-green-600 text-white rounded">Zur Kasse</button>
+        </div>
+      </div>
     </div>
   );
 }

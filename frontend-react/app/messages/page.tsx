@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { fetchMessages, sendMessage } from "../services/api";
 
 export default function MessagesPage() {
@@ -41,15 +42,31 @@ export default function MessagesPage() {
 
   if (loading) return <div className="p-6">Lade Nachrichten…</div>;
   if (error) return <div className="p-6 text-red-600">Fehler: {error}</div>;
+  if (messages.length === 0)
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <h1 className="text-2xl mb-4">Nachrichten</h1>
+        <div className="border rounded p-8 bg-gray-50">
+          <div className="text-4xl">✉️</div>
+          <p className="mt-4">Keine Nachrichten vorhanden.</p>
+          <p className="mt-2 text-sm text-gray-600">Du kannst anderen Nutzer:innen Nachrichten senden, um Interesse an Produkten zu zeigen.</p>
+          <div className="mt-4">
+            <Link href="/collections" className="inline-block px-4 py-2 bg-green-600 text-white rounded">Zu den Kollektionen</Link>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl mb-4">Nachrichten</h1>
 
-      <div className="mb-6 border p-4 rounded">
+      <div className="mb-6 border p-4 rounded bg-white shadow-sm">
         <h2 className="font-semibold mb-2">Neue Nachricht</h2>
-        <input value={recipientId} onChange={e => setRecipientId(e.target.value)} placeholder="Empfänger ID" className="border p-2 mr-2" />
-        <textarea value={content} onChange={e => setContent(e.target.value)} placeholder="Nachricht" className="border p-2 w-full mt-2" />
+        <label htmlFor="recipientId" className="block text-sm text-gray-700">Empfänger ID</label>
+        <input id="recipientId" value={recipientId} onChange={e => setRecipientId(e.target.value)} placeholder="z. B. 42" className="border p-2 mr-2 w-full sm:w-64" />
+        <label htmlFor="content" className="block text-sm text-gray-700 mt-3">Nachricht</label>
+        <textarea id="content" value={content} onChange={e => setContent(e.target.value)} placeholder="Schreibe eine Nachricht" className="border p-2 w-full h-28 mt-2" />
         <div className="mt-2">
           <button onClick={send} className="px-4 py-2 bg-green-600 text-white rounded">Senden</button>
         </div>

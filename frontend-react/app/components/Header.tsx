@@ -1,19 +1,32 @@
-'use client';
+"use client";
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { fetchProfile } from '../services/api';
 
 export default function Header() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
+    // Check if user is logged in and try to load profile
+    const token = globalThis.window !== undefined && globalThis.window ? globalThis.window.localStorage.getItem('token') : null;
+    const logged = !!token;
+    setIsLoggedIn(logged);
+    if (logged) {
+      fetchProfile()
+        .then((u: any) => {
+          setProfileImageUrl(u?.profileImageUrl ?? null);
+        })
+        .catch(() => {
+          // ignore profile load errors (e.g., expired token)
+          setProfileImageUrl(null);
+        });
+    }
   }, []);
 
   // Close menu when clicking outside
@@ -115,11 +128,23 @@ export default function Header() {
                   router.push('/login');
                 }
               }}
-              className="p-2 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="p-1 rounded-full hover:bg-green-50 text-green-600 hover:text-green-800 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              {profileImageUrl ? (
+                <img
+                  src={profileImageUrl}
+                  alt="Profilbild"
+                  className="w-7 h-7 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '';
+                    setProfileImageUrl(null);
+                  }}
+                />
+              ) : (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              )}
             </button>
 
             {/* Profile Dropdown Menu */}

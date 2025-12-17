@@ -17,8 +17,7 @@ import java.util.List;
 public class CartController {
 
     private static final String PRODUCT_NOT_FOUND = "Product not found";
-
-    private static final String PRODUCT_ID_NULL_MESSAGE = "Product ID cannot be null";
+    private static final String PRODUCT_ID_REQUIRED = "Product ID is required";
 
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
@@ -43,11 +42,9 @@ public class CartController {
     public ResponseEntity<?> addToCart(@RequestHeader("Authorization") String authHeader, @RequestBody AddToCartRequest req) {
         String token = authHeader.substring(7);
         User user = userService.getUserProfile(token);
-        if (req.productId() == null) return ResponseEntity.badRequest().body("Product ID is required");
-        if (req.productId() == null) return ResponseEntity.badRequest().body("Product ID cannot be null");
-        if (req.productId() == null) return ResponseEntity.badRequest().body("Product ID cannot be null");
+        if (req.productId() == null) return ResponseEntity.badRequest().body(PRODUCT_ID_REQUIRED);
         Long productId = req.productId();
-        if (productId == null) return ResponseEntity.badRequest().body("Product ID cannot be null");
+        if (productId == null) return ResponseEntity.badRequest().body(PRODUCT_ID_REQUIRED);
         Product p = productRepository.findById(productId).orElse(null);
         if (p == null) return ResponseEntity.badRequest().body(PRODUCT_NOT_FOUND);
         var existing = cartItemRepository.findByUserAndProduct(user, p);
@@ -66,6 +63,7 @@ public class CartController {
     public ResponseEntity<?> updateQuantity(@RequestHeader("Authorization") String authHeader, @PathVariable Long productId, @RequestBody Integer quantity) {
         String token = authHeader.substring(7);
         User user = userService.getUserProfile(token);
+        if (productId == null) return ResponseEntity.badRequest().body(PRODUCT_ID_REQUIRED);
         Product p = productRepository.findById(productId).orElse(null);
         if (p == null) return ResponseEntity.badRequest().body(PRODUCT_NOT_FOUND);
         var existing = cartItemRepository.findByUserAndProduct(user, p);
@@ -80,6 +78,7 @@ public class CartController {
     public ResponseEntity<?> removeFromCart(@RequestHeader("Authorization") String authHeader, @PathVariable Long productId) {
         String token = authHeader.substring(7);
         User user = userService.getUserProfile(token);
+        if (productId == null) return ResponseEntity.badRequest().body(PRODUCT_ID_REQUIRED);
         Product p = productRepository.findById(productId).orElse(null);
         if (p == null) return ResponseEntity.badRequest().body(PRODUCT_NOT_FOUND);
         cartItemRepository.deleteByUserAndProduct(user, p);
