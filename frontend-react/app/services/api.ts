@@ -78,3 +78,29 @@ export async function fetchProfile() {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function fetchProduct(id: number) {
+  const res = await fetch(`${API_BASE}/products/${id}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function updateProduct(id: number, body: any) {
+  const token = ensureToken();
+  const res = await fetch(`${API_BASE}/products/${id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function deleteProduct(id: number) {
+  const token = ensureToken();
+  const res = await fetch(`${API_BASE}/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(await res.text());
+  return true;
+}
+
+export async function fetchProductsByCategory(name: string) {
+  const res = await fetch(`${API_BASE}/products/category/${encodeURIComponent(name)}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

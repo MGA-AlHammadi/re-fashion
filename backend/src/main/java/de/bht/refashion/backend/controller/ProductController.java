@@ -85,4 +85,68 @@ public class ProductController {
         }
         return ResponseEntity.ok(saved);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody CreateProductRequest req) {
+        var prodOpt = productRepository.findById(id);
+        if (prodOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Product p = prodOpt.get();
+
+        // check owner
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
+            return ResponseEntity.status(403).body("Not authorized");
+        }
+        String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(403).body("Not authorized");
+        }
+        // if product has no owner, allow the authenticated user to claim it for editing
+        if (p.getOwner() == null) {
+            p.setOwner(userOpt.get());
+        } else if (!p.getOwner().getId().equals(userOpt.get().getId())) {
+            return ResponseEntity.status(403).body("Only owner can edit product");
+        }
+
+        if (req.getTitle() != null) p.setTitle(req.getTitle());
+        if (req.getDescription() != null) p.setDescription(req.getDescription());
+        if (req.getPrice() != null) p.setPrice(req.getPrice());
+        if (req.getSize() != null) p.setSize(req.getSize());
+        if (req.getCondition() != null) p.setCondition(req.getCondition());
+        if (req.getImageUrl() != null) p.setImageUrl(req.getImageUrl());
+        if (req.getCategoryId() != null) {
+            var cat = categoryRepository.findById(req.getCategoryId()).orElse(null);
+            p.setCategory(cat);
+        }
+
+        var saved = productRepository.save(p);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        var prodOpt = productRepository.findById(id);
+        if (prodOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Product p = prodOpt.get();
+
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
+            return ResponseEntity.status(403).body("Not authorized");
+        }
+        String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(403).body("Not authorized");
+        }
+        // if product has no owner, allow the authenticated user to delete it
+        if (p.getOwner() != null && !p.getOwner().getId().equals(userOpt.get().getId())) {
+            return ResponseEntity.status(403).body("Only owner can delete product");
+        }
+
+        productRepository.delete(p);
+        return ResponseEntity.noContent().build();
+    }
 }
