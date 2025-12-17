@@ -71,3 +71,10 @@ export async function sendMessage(recipientId: number, content: string) {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function fetchProfile() {
+  const token = ensureToken();
+  const res = await fetch(`${API_BASE}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

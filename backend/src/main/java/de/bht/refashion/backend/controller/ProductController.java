@@ -52,10 +52,20 @@ public class ProductController {
         if (categoryId != null) {
             category = categoryRepository.findById(categoryId).orElse(null);
         }
-
-        var ownerOpt = userRepository.findById(req.getOwnerId() == null ? -1L : req.getOwnerId());
-        if (req.getOwnerId() != null && ownerOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Owner not found");
+        // determine owner from authenticated principal if available
+        var ownerOpt = java.util.Optional.<de.bht.refashion.backend.model.User>empty();
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User user) {
+            String email = user.getUsername();
+            ownerOpt = userRepository.findByEmail(email);
+        } else if (req.getOwnerId() != null) {
+            Long ownerId = req.getOwnerId();
+            if (ownerId != null) {
+                ownerOpt = userRepository.findById(ownerId);
+                if (ownerOpt.isEmpty()) {
+                    return ResponseEntity.badRequest().body("Owner not found");
+                }
+            }
         }
 
         Product p = new Product();
