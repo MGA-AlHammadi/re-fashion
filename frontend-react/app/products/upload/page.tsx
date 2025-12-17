@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from 'next/link';
 
 export default function UploadProductPage() {
   const [categories, setCategories] = useState<Array<any>>([]);
@@ -14,12 +15,17 @@ export default function UploadProductPage() {
     categoryId: ""
   });
   const [status, setStatus] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/categories')
       .then(r => r.ok ? r.json() : [])
       .then(data => setCategories(data))
       .catch(() => setCategories([]));
+    // check for token
+    const t = typeof globalThis.window !== 'undefined' ? globalThis.window.localStorage.getItem('token') : null;
+    setToken(t);
+    if (!t) setStatus('Bitte zuerst einloggen, um ein Produkt hochzuladen.');
   }, []);
 
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,6 +37,11 @@ export default function UploadProductPage() {
     // basic client-side validation
     if (!form.title || !form.price || !form.categoryId) {
       setStatus('Bitte fülle Titel, Preis und Kategorie aus.');
+      return;
+    }
+
+    if (!token) {
+      setStatus('Nicht angemeldet — bitte zuerst einloggen.');
       return;
     }
 
@@ -46,9 +57,11 @@ export default function UploadProductPage() {
 
     try {
       // include token if available
-      const token = globalThis.window?.localStorage?.getItem('token') ?? null;
+      const tokenLocal = globalThis.window?.localStorage?.getItem('token') ?? null;
       const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (tokenLocal) headers['Authorization'] = `Bearer ${tokenLocal}`;
+
+      console.log('DEBUG: POST /api/products', { headers, body });
 
       const res = await fetch('http://localhost:8080/api/products', {
         method: 'POST',
@@ -57,11 +70,14 @@ export default function UploadProductPage() {
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => null);
+        console.log('Upload successful', data);
         setStatus('success');
         setForm({ title: '', description: '', price: '', size: '', condition: '', imageUrl: '', categoryId: '' });
       } else {
-        const text = await res.text();
-        setStatus('Fehler: ' + text);
+        const text = await res.text().catch(() => 'Unable to read response');
+        console.error('Upload failed', res.status, text);
+        setStatus(`Fehler ${res.status}: ${text}`);
       }
     } catch (err) {
       console.error('Upload failed:', err);
@@ -73,6 +89,11 @@ export default function UploadProductPage() {
     <div className="min-h-screen bg-white py-20 text-black">
       <div className="max-w-3xl mx-auto px-6">
         <h1 className="text-3xl font-thin mb-6">Sell an item</h1>
+        {token ? (
+          <div className="text-sm text-gray-600 mb-4">Token: {token.substring(0, 30)}...</div>
+        ) : (
+          <div className="text-sm text-red-600 mb-4">Kein Token gefunden. Bitte einloggen.</div>
+        )}
 
         <form onSubmit={submit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
           <div>
@@ -126,14 +147,18 @@ export default function UploadProductPage() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button disabled={status === 'loading'} className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded">
+              <button disabled={status === 'loading' || !token} className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded">
                 {status === 'loading' ? 'Uploading...' : 'Upload'}
               </button>
               {status && (
                 <div className={`text-sm ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>{status}</div>
               )}
             </div>
-            <div className="text-sm text-gray-500">Tip: gute Fotos erhöhen die Verkaufschance.</div>
+            <div className="text-sm text-gray-500">
+              {token ? 'Tip: gute Fotos erhöhen die Verkaufschance.' : (
+                <Link href="/login" className="text-blue-600 underline">Jetzt einloggen</Link>
+              )}
+            </div>
           </div>
         </form>
       </div>

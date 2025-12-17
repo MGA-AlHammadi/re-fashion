@@ -45,22 +45,23 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateProductRequest req) {
         Category category = null;
-        if (req.categoryId != null) {
-            category = categoryRepository.findById(req.categoryId).orElse(null);
+        Long categoryId = req.getCategoryId();
+        if (categoryId != null) {
+            category = categoryRepository.findById(categoryId).orElse(null);
         }
 
-        var ownerOpt = userRepository.findById(req.ownerId == null ? -1L : req.ownerId);
-        if (req.ownerId != null && ownerOpt.isEmpty()) {
+        var ownerOpt = userRepository.findById(req.getOwnerId() == null ? -1L : req.getOwnerId());
+        if (req.getOwnerId() != null && ownerOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Owner not found");
         }
 
         Product p = new Product();
-        p.setTitle(req.title);
-        p.setDescription(req.description);
-        p.setPrice(req.price);
-        p.setSize(req.size);
-        p.setCondition(req.condition);
-        p.setImageUrl(req.imageUrl);
+        p.setTitle(req.getTitle());
+        p.setDescription(req.getDescription());
+        p.setPrice(req.getPrice());
+        p.setSize(req.getSize());
+        p.setCondition(req.getCondition());
+        p.setImageUrl(req.getImageUrl());
         p.setCategory(category);
         ownerOpt.ifPresent(p::setOwner);
 

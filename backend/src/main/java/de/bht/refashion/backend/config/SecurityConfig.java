@@ -28,8 +28,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 
-                .requestMatchers("/api/register", "/api/login").permitAll()
-                
+                .requestMatchers("/api/register", "/api/login", "/api/categories/**", "/api/products/**").permitAll()
+
                 .anyRequest().authenticated()
             )
             
