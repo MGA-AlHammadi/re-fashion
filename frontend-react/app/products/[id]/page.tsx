@@ -14,6 +14,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => { load(); }, [id]);
 
@@ -69,7 +70,7 @@ export default function ProductDetailPage() {
   }
 
   async function handleDelete() {
-    if (!confirm('Produkt wirklich löschen?')) return;
+    setShowDeleteModal(false);
     try {
       await deleteProduct(id);
       showToast('🗑️ Produkt erfolgreich gelöscht!', 'success');
@@ -91,6 +92,39 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 py-12">
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md mx-4 transform animate-scale-in">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-rose-200 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Produkt löschen?</h3>
+              <p className="text-gray-600 mb-8 text-lg">
+                Möchtest du dieses Produkt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+              </p>
+              <div className="flex gap-4 w-full">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200 transform hover:scale-105"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 px-6 py-4 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  Löschen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast Notification */}
       {toast.show && (
         <div className="fixed top-24 right-8 z-50 animate-slide-in-right">
