@@ -6,8 +6,7 @@ import de.bht.refashion.backend.model.User;
 import de.bht.refashion.backend.repository.CartItemRepository;
 import de.bht.refashion.backend.repository.ProductRepository;
 import de.bht.refashion.backend.service.UserService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;import org.springframework.transaction.annotation.Transactional;import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -74,6 +73,7 @@ public class CartController {
         return ResponseEntity.ok(item);
     }
 
+    @Transactional
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> removeFromCart(@RequestHeader("Authorization") String authHeader, @PathVariable Long productId) {
         String token = authHeader.substring(7);

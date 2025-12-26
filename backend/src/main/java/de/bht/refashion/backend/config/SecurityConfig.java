@@ -33,6 +33,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/products").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/cart/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/cart/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/cart/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/favorites/**").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/favorites/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/favorites/**").authenticated()
+                .requestMatchers("/api/messages/**").authenticated()
                 .anyRequest().authenticated()
             )
             

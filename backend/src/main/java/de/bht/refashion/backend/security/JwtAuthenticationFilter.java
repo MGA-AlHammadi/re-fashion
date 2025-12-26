@@ -30,9 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("=== JWT Filter: " + request.getMethod() + " " + request.getRequestURI());
+        
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("=== No Bearer token found");
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String email = jwtUtil.extractEmail(token);
 
         if (email != null && jwtUtil.validateToken(token)) {
+            System.out.println("=== Token valid for: " + email);
             var authentication = new UsernamePasswordAuthenticationToken(
                     new User(email, "", Collections.emptyList()),
                     null,
@@ -48,6 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            System.out.println("=== Token INVALID");
         }
 
         filterChain.doFilter(request, response);

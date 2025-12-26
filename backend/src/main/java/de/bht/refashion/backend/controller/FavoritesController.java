@@ -7,6 +7,7 @@ import de.bht.refashion.backend.repository.FavoriteRepository;
 import de.bht.refashion.backend.repository.ProductRepository;
 import de.bht.refashion.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class FavoritesController {
         return ResponseEntity.ok(f.getProduct());
     }
 
+    @Transactional
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> removeFavorite(@RequestHeader("Authorization") String authHeader, @PathVariable Long productId) {
         String token = authHeader.substring(7);

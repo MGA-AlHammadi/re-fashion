@@ -25,9 +25,19 @@ export async function addFavorite(productId: number) {
 
 export async function removeFavorite(productId: number) {
   const token = ensureToken();
-  const res = await fetch(`${API_BASE}/favorites/${productId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error(await res.text());
-  return true;
+  try {
+    const res = await fetch(`${API_BASE}/favorites/${productId}`, { 
+      method: "DELETE", 
+      headers: { Authorization: `Bearer ${token}` } 
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error('removeFavorite error:', error);
+    throw error;
+  }
 }
 
 export async function fetchCart() {
@@ -53,9 +63,19 @@ export async function updateCartQuantity(productId: number, quantity: number) {
 
 export async function removeFromCart(productId: number) {
   const token = ensureToken();
-  const res = await fetch(`${API_BASE}/cart/${productId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) throw new Error(await res.text());
-  return true;
+  try {
+    const res = await fetch(`${API_BASE}/cart/${productId}`, { 
+      method: "DELETE", 
+      headers: { Authorization: `Bearer ${token}` } 
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return true;
+  } catch (error) {
+    console.error('removeFromCart error:', error);
+    throw error;
+  }
 }
 
 export async function fetchMessages() {

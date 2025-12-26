@@ -12,30 +12,52 @@ export default async function MenPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-20">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-4xl font-thin mb-4">MEN</h1>
-        <p className="text-gray-600 mb-4">Shirts, Pants & More — bewusst produziert</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-20">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="mb-8">
+          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">MEN</h1>
+          <p className="text-gray-600 text-lg">Shirts, Pants & More — bewusst produziert</p>
+        </div>
         <SellButton />
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {products.length === 0 && (
-            <div className="text-center text-gray-500 col-span-full">Keine Produkte gefunden.</div>
-          )}
-
-          {products.map((p: any) => (
-            <div key={p.id} className="p-6 bg-gray-50 rounded-2xl shadow-sm">
-              <div className="h-40 bg-gradient-to-br from-blue-100 to-indigo-200 rounded-lg mb-4 flex items-center justify-center">
-                <img src={p.imageUrl || '/placeholder.png'} alt={p.title} className="w-24 h-24 object-cover rounded-full" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">{p.title}</h3>
-              <div className="text-green-600 font-bold mb-3">{p.price ? p.price + '€' : '-'}</div>
-              <Link href={`/products/${p.id}`} className="block w-full text-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition">
-                Details ansehen
-              </Link>
+        {products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-cyan-200 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
             </div>
-          ))}
-        </div>
+            <h3 className="text-2xl font-semibold text-gray-700 mb-2">Keine Produkte gefunden</h3>
+            <p className="text-gray-500">Bald gibt es hier tolle Angebote!</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+            {products.map((p: any) => (
+              <div key={p.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+                <div className="relative h-64 bg-gradient-to-br from-blue-100 via-cyan-100 to-blue-200 overflow-hidden">
+                  <img 
+                    src={p.imageUrl || '/placeholder.png'} 
+                    alt={p.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-blue-600">
+                    {p.price ? p.price + '€' : '-'}
+                  </div>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-800 line-clamp-2 h-14">{p.title}</h3>
+                  <p className="text-sm text-gray-500 mb-4 line-clamp-1">{p.condition || 'Wie neu'}</p>
+                  <Link 
+                    href={`/products/${p.id}`} 
+                    className="block w-full text-center px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-md hover:shadow-lg"
+                  >
+                    Details ansehen
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
