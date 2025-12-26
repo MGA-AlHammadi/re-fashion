@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { fetchProduct, addFavorite, addToCart, fetchProfile, deleteProduct } from "../../services/api";
 
-export default function ProductDetailPage({ params }: any) {
+export default function ProductDetailPage() {
   const router = useRouter();
+  const params = useParams();
   const id = Number(params.id);
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);

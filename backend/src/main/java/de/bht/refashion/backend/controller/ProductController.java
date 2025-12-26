@@ -52,20 +52,17 @@ public class ProductController {
         if (categoryId != null) {
             category = categoryRepository.findById(categoryId).orElse(null);
         }
-        // determine owner from authenticated principal if available
-        var ownerOpt = java.util.Optional.<de.bht.refashion.backend.model.User>empty();
+        
+        // Owner aus dem authentifizierten Benutzer ermitteln
         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User user) {
-            String email = user.getUsername();
-            ownerOpt = userRepository.findByEmail(email);
-        } else if (req.getOwnerId() != null) {
-            Long ownerId = req.getOwnerId();
-            if (ownerId != null) {
-                ownerOpt = userRepository.findById(ownerId);
-                if (ownerOpt.isEmpty()) {
-                    return ResponseEntity.badRequest().body("Owner not found");
-                }
-            }
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+        
+        String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
+        var ownerOpt = userRepository.findByEmail(email);
+        if (ownerOpt.isEmpty()) {
+            return ResponseEntity.status(403).body("User not found");
         }
 
         Product p = new Product();
@@ -76,14 +73,11 @@ public class ProductController {
         p.setCondition(req.getCondition());
         p.setImageUrl(req.getImageUrl());
         p.setCategory(category);
-        ownerOpt.ifPresent(p::setOwner);
+        p.setOwner(ownerOpt.get());
 
         Product saved = productRepository.save(p);
         URI location = URI.create("/api/products/" + saved.getId());
-        if (location != null) {
-            return ResponseEntity.created(location).body(saved);
-        }
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.created(location).body(saved);
     }
 
     @PutMapping("/{id}")
@@ -93,21 +87,21 @@ public class ProductController {
 
         Product p = prodOpt.get();
 
-        // check owner
+        // Authentifizierung prüfen
         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
-            return ResponseEntity.status(403).body("Not authorized");
+            return ResponseEntity.status(401).body("Authentication required");
         }
+        
         String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
         var userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(403).body("Not authorized");
+            return ResponseEntity.status(403).body("User not found");
         }
-        // if product has no owner, allow the authenticated user to claim it for editing
-        if (p.getOwner() == null) {
-            p.setOwner(userOpt.get());
-        } else if (!p.getOwner().getId().equals(userOpt.get().getId())) {
-            return ResponseEntity.status(403).body("Only owner can edit product");
+        
+        // Nur Owner darf Produkt bearbeiten
+        if (p.getOwner() == null || !p.getOwner().getId().equals(userOpt.get().getId())) {
+            return ResponseEntity.status(403).body("Only the owner can edit this product");
         }
 
         if (req.getTitle() != null) p.setTitle(req.getTitle());
@@ -132,21 +126,52 @@ public class ProductController {
 
         Product p = prodOpt.get();
 
+        // Authentifizierung prüfen
         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
-            return ResponseEntity.status(403).body("Not authorized");
+            return ResponseEntity.status(401).body("Authentication required");
         }
+        
         String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
         var userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(403).body("Not authorized");
+            return ResponseEntity.status(403).body("User not found");
         }
-        // if product has no owner, allow the authenticated user to delete it
-        if (p.getOwner() != null && !p.getOwner().getId().equals(userOpt.get().getId())) {
-            return ResponseEntity.status(403).body("Only owner can delete product");
+        
+        // Nur Owner darf Produkt löschen
+        if (p.getOwner() == null || !p.getOwner().getId().equals(userOpt.get().getId())) {
+            return ResponseEntity.status(403).body("Only the owner can delete this product");
         }
 
         productRepository.delete(p);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/claim-orphaned")
+    public ResponseEntity<?> claimOrphanedProducts() {
+        // Authentifizierung prüfen
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof org.springframework.security.core.userdetails.User)) {
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+        
+        String email = ((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername();
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(403).body("User not found");
+        }
+
+        // Alle Produkte ohne Owner finden und dem aktuellen Benutzer zuweisen
+        var orphanedProducts = productRepository.findAll().stream()
+                .filter(p -> p.getOwner() == null)
+                .peek(p -> p.setOwner(userOpt.get()))
+                .toList();
+        
+        productRepository.saveAll(orphanedProducts);
+        
+        return ResponseEntity.ok(java.util.Map.of(
+            "message", "Products claimed successfully",
+            "count", orphanedProducts.size()
+        ));
     }
 }

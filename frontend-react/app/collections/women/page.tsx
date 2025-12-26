@@ -1,4 +1,5 @@
 import SellButton from '../../components/SellButton';
+import Link from 'next/link';
 
 export default async function WomenPage() {
   let products: Array<any> = [];
@@ -28,7 +29,10 @@ export default async function WomenPage() {
                 <img src={p.imageUrl || '/placeholder.png'} alt={p.title} className="w-24 h-24 object-cover rounded-full" />
               </div>
               <h3 className="font-medium text-lg mb-2">{p.title}</h3>
-              <div className="text-green-600 font-bold">{p.price ? p.price + '€' : '-'}</div>
+              <div className="text-green-600 font-bold mb-3">{p.price ? p.price + '€' : '-'}</div>
+              <Link href={`/products/${p.id}`} className="block w-full text-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition">
+                Details ansehen
+              </Link>
             </div>
           ))}
         </div>

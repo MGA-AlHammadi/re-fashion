@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchProductsByCategory, fetchProfile, deleteProduct } from "../../services/api";
+import { fetchProductsByCategory } from "../../services/api";
 
 function accentForCategory(cat: string) {
   const key = cat?.toLowerCase();
@@ -20,7 +20,6 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => { load(); }, [category]);
 
@@ -29,21 +28,10 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
     try {
       const data = await fetchProductsByCategory(category);
       setItems(data);
-      try { const p = await fetchProfile(); setProfile(p); } catch { setProfile(null); }
       setError(null);
     } catch (e: any) {
       setError(e.message || String(e));
     } finally { setLoading(false); }
-  }
-
-  async function handleDelete(id: number) {
-    if (!confirm('Produkt wirklich löschen?')) return;
-    try {
-      await deleteProduct(id);
-      load();
-    } catch (e: any) {
-      alert(e.message || String(e));
-    }
   }
 
   if (loading) return <div className="p-6">Lade Kategorie…</div>;
@@ -60,7 +48,6 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((p: any) => {
-            const isOwner = profile && p.owner && profile.id === p.owner.id;
             return (
               <div key={p.id} className={`border rounded overflow-hidden shadow-sm ${accentForCategory(category)}`}>
                 <Link href={`/products/${p.id}`} className="block">
@@ -82,17 +69,10 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
 
                   <p className="mt-3 text-sm text-gray-700 line-clamp-2">{p.description}</p>
 
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <button onClick={async (e) => { e.preventDefault(); try { await fetch(`/api/products/${p.id}`); } catch {} }} className="px-3 py-1 bg-green-600 text-white rounded text-sm">Ansehen</button>
-                      <button onClick={async (e) => { e.preventDefault(); try { const token = localStorage.getItem('token'); if (!token) { window.location.href = '/login'; return; } await fetch(`/api/products/${p.id}`); } catch {} }} className="px-3 py-1 bg-yellow-50 text-yellow-800 rounded text-sm">Favorit</button>
-                    </div>
-                    {isOwner && (
-                      <div className="flex items-center space-x-2">
-                        <Link href={`/products/${p.id}/edit`} className="text-sm px-2 py-1 border rounded">Bearbeiten</Link>
-                        <button onClick={() => handleDelete(p.id)} className="text-sm px-2 py-1 bg-red-600 text-white rounded">Löschen</button>
-                      </div>
-                    )}
+                  <div className="mt-4">
+                    <Link href={`/products/${p.id}`} className="block w-full text-center px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition">
+                      Details ansehen
+                    </Link>
                   </div>
                 </div>
               </div>
