@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -41,6 +43,10 @@ public class UserService {
     }
 
     public String login(String email, String password) {
+        return login(email, password, false);
+    }
+
+    public String login(String email, String password, boolean rememberMe) {
         var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException(USER_NOT_FOUND));
 
@@ -48,7 +54,7 @@ public class UserService {
             throw new IllegalArgumentException("Invalid password");
         }
 
-        return jwtUtil.generateToken(email);
+        return jwtUtil.generateToken(email, rememberMe);
     }
 
     public User getUserProfile(String token) {
@@ -104,5 +110,21 @@ public class UserService {
         User savedUser = userRepository.save(user);
         savedUser.setPassword(null);
         return savedUser;
+    }
+
+    public List<User> searchUsers(String query) {
+        List<User> allUsers = userRepository.findAll();
+        return allUsers.stream()
+                .filter(user -> user.getName() != null && 
+                               user.getName().toLowerCase().contains(query.toLowerCase()))
+                .map(user -> {
+                    User safeUser = new User();
+                    safeUser.setId(user.getId());
+                    safeUser.setName(user.getName());
+                    safeUser.setEmail(user.getEmail());
+                    safeUser.setProfileImageUrl(user.getProfileImageUrl());
+                    return safeUser;
+                })
+                .collect(Collectors.toList());
     }
 }

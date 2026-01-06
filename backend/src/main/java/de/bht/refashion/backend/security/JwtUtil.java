@@ -20,14 +20,20 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static final long EXPIRATION_TIME = 24L * 60 * 60 * 1000;
+    private static final long EXPIRATION_TIME = 24L * 60 * 60 * 1000; // 24 hours
+    private static final long REMEMBER_ME_EXPIRATION = 30L * 24 * 60 * 60 * 1000; // 30 days
 
 
     public String generateToken(String email) {
+        return generateToken(email, false);
+    }
+
+    public String generateToken(String email, boolean rememberMe) {
+        long expirationTime = rememberMe ? REMEMBER_ME_EXPIRATION : EXPIRATION_TIME;
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function LoginPage() {
     const res = await fetch("http://localhost:8080/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, rememberMe }),
     });
 
     const data = await res.json();
@@ -57,6 +58,20 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center space-x-2">
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer">
+              Angemeldet bleiben (30 Tage)
+            </label>
+          </div>
 
           <button className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">
             Login

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchMessages, sendMessage, fetchProfile } from "../services/api";
+import { fetchMessages, sendMessage, fetchProfile, searchUsers } from "../services/api";
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -13,7 +13,9 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [showNewChat, setShowNewChat] = useState(false);
-  const [recipientId, setRecipientId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
 
   useEffect(() => { load(); }, []);
@@ -44,7 +46,7 @@ export default function MessagesPage() {
 
   async function send() {
     if (!newMessage.trim()) return;
-    const targetId = selectedConversation || Number(recipientId);
+    const targetId = selectedConversation || selectedUser?.id;
     if (!targetId) {
       showToast('Bitte wähle einen Empfänger', 'error');
       return;
@@ -54,11 +56,30 @@ export default function MessagesPage() {
       await sendMessage(targetId, newMessage);
       setNewMessage("");
       setShowNewChat(false);
+      setSelectedUser(null);
+      setSearchQuery("");
+      setSearchResults([]);
       showToast('✉️ Nachricht gesendet!', 'success');
       load();
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { router.push('/login'); return; }
       showToast('Fehler beim Senden: ' + (e.message || String(e)), 'error');
+    }
+  }
+
+  async function handleSearch(query: string) {
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    try {
+      const results = await searchUsers(query);
+      setSearchResults(results);
+    } catch (e: any) {
+      console.error('Search error:', e);
+      setSearchResults([]);
     }
   }
 
@@ -147,15 +168,73 @@ export default function MessagesPage() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Empfänger User-ID</label>
-                <input 
-                  type="number"
-                  value={recipientId}
-                  onChange={(e) => setRecipientId(e.target.value)}
-                  placeholder="z.B. 42"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-black"
-                />
-                <p className="text-xs text-gray-500 mt-1">Gib die User-ID des Empfängers ein</p>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Empfänger suchen</label>
+                <div className="relative">
+                  <input 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    placeholder="Name eingeben..."
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-black"
+                  />
+                  <svg className="w-5 h-5 text-gray-400 absolute right-4 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="mt-2 max-h-48 overflow-y-auto border-2 border-gray-200 rounded-xl">
+                    {searchResults.map((user: any) => (
+                      <button
+                        key={user.id}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setSearchQuery(user.name);
+                          setSearchResults([]);
+                        }}
+                        className={`w-full p-3 text-left hover:bg-blue-50 transition-all flex items-center space-x-3 ${
+                          selectedUser?.id === user.id ? 'bg-blue-100' : ''
+                        }`}
+                      >
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-bold">{user.name?.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">{user.name}</p>
+                          <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {selectedUser && (
+                  <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">{selectedUser.name?.charAt(0).toUpperCase()}</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{selectedUser.name}</p>
+                        <p className="text-xs text-gray-600">Ausgewählt</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedUser(null);
+                        setSearchQuery("");
+                      }}
+                      className="text-gray-400 hover:text-red-600 transition"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+                
+                <p className="text-xs text-gray-500 mt-1">Suche nach Namen, um einen Empfänger zu finden</p>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Nachricht</label>

@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/favorites/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/favorites/**").authenticated()
                 .requestMatchers("/api/messages/**").authenticated()
+                .requestMatchers("/api/users/search").authenticated()
                 .anyRequest().authenticated()
             )
             

@@ -34,9 +34,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody User loginRequest) {
+    public ResponseEntity<Object> login(@RequestBody Map<String, Object> loginRequest) {
         try {
-            String token = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
+            String email = (String) loginRequest.get("email");
+            String password = (String) loginRequest.get("password");
+            Boolean rememberMe = loginRequest.get("rememberMe") != null ? (Boolean) loginRequest.get("rememberMe") : false;
+            
+            String token = userService.login(email, password, rememberMe);
             Map<String, String> response = Map.of("token", token);
             return ResponseEntity.ok().body(response);
         } catch (RuntimeException e) {
@@ -92,5 +96,15 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthenticated");
         }
         return ResponseEntity.ok(Map.of("principal", auth.getName()));
+    }
+
+    @GetMapping("/users/search")
+    public ResponseEntity<Object> searchUsers(@RequestParam String query) {
+        try {
+            var users = userService.searchUsers(query);
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

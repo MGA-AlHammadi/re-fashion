@@ -124,3 +124,12 @@ export async function fetchProductsByCategory(name: string) {
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export async function searchUsers(query: string) {
+  const token = ensureToken();
+  const res = await fetch(`${API_BASE}/users/search?query=${encodeURIComponent(query)}`, { 
+    headers: { Authorization: `Bearer ${token}` } 
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
