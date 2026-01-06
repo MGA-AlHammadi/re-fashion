@@ -52,7 +52,8 @@ export default function Header() {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setShowProfileMenu(false);
-    router.push('/');
+    // Force page reload to clear all state
+    window.location.href = '/login';
   };
 
   return (

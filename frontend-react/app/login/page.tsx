@@ -17,23 +17,28 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:8080/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, rememberMe }),
-    });
+    try {
+      const res = await fetch("http://localhost:8080/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, rememberMe }),
+      });
 
-    const data = await res.json();
-
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      setToast({message: "Login erfolgreich!", type: 'success'});
-      setTimeout(() => {
-        globalThis.location.href = "/";
-      }, 1500);
-    } else {
-      const errorMsg = await res.text();
-      setToast({message: "Fehler: " + errorMsg, type: 'error'});
+      if (res.ok) {
+        const data = await res.json();
+        // Clear any old token first
+        localStorage.clear();
+        localStorage.setItem("token", data.token);
+        setToast({message: "Login erfolgreich!", type: 'success'});
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1500);
+      } else {
+        const errorMsg = await res.text();
+        setToast({message: "Login fehlgeschlagen: " + errorMsg, type: 'error'});
+      }
+    } catch (error) {
+      setToast({message: "Verbindungsfehler. Ist der Server gestartet?", type: 'error'});
     }
   };
 

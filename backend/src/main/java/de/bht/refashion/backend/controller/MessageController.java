@@ -29,7 +29,8 @@ public class MessageController {
     public List<Message> inbox(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         User user = userService.getUserProfile(token);
-        return messageRepository.findByRecipientOrderByCreatedAtDesc(user);
+        // Return ALL messages where user is either sender or recipient
+        return messageRepository.findAllMessagesByUser(user);
     }
 
     record SendMessageRequest(Long recipientId, String content) {}
