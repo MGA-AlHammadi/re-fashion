@@ -26,18 +26,19 @@ export default function LoginPage() {
 
       if (res.ok) {
         const data = await res.json();
-        // Clear any old token first
-        localStorage.clear();
+        // Remove only the old token, not everything
+        localStorage.removeItem("token");
         localStorage.setItem("token", data.token);
         setToast({message: "Login erfolgreich!", type: 'success'});
         setTimeout(() => {
           window.location.href = "/";
-        }, 1500);
+        }, 1000);
       } else {
         const errorMsg = await res.text();
         setToast({message: "Login fehlgeschlagen: " + errorMsg, type: 'error'});
       }
     } catch (error) {
+      console.error("Login error:", error);
       setToast({message: "Verbindungsfehler. Ist der Server gestartet?", type: 'error'});
     }
   };
