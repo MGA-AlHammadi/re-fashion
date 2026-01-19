@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchProductsByCategory } from "../../services/api";
 import ProductFilters from "../../components/ProductFilters";
@@ -23,8 +23,8 @@ function getFirstProductImage(product: any): string | null {
   return images.length > 0 ? images[0] : null;
 }
 
-export default function CategoryPage({ params }: { readonly params: { readonly category: string } }) {
-  const category = params.category;
+export default function CategoryPage({ params }: { readonly params: Promise<{ readonly category: string }> }) {
+  const { category } = use(params);
   const displayName = category.replaceAll('-', ' ').toUpperCase();
 
   const [items, setItems] = useState<any[]>([]);
@@ -46,28 +46,18 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
     } finally { setLoading(false); }
   }
 
+  const handleFilterChange = (filters: any) => {
+    let filtered = [...items];
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <header className="mb-8">
-          <h1 className="text-4xl font-semibold">{displayName}</h1>
-          <p className="text-gray-600 mt-2">Entdecke Artikel aus der Kategorie {displayName}</p>
-        </header>
+    // Search filter
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.title?.toLowerCase().includes(searchLower) ||
+        p.description?.toLowerCase().includes(searchLower)
+      );
+    }
 
-        <ProductFilters onFilterChange={handleFilterChange} productCount={filteredItems.length} />
-
-        {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <svg className="w-24 h-24 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Keine Produkte gefunden</h3>
-            <p className="text-gray-500">Versuche es mit anderen Filtern</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredI
     // Price filters
     if (filters.priceMin) {
       filtered = filtered.filter(p => Number(p.price) >= Number(filters.priceMin));
@@ -106,52 +96,118 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
     setFilteredItems(filtered);
   };
 
-  if (loading) return <div className="p-6">Lade Kategorie…</div>;
-  if (error) return <div className="p-6 text-red-600">Fehler: {error}</div>;
-  if (items.length === 0) return <div className="p-6">Keine Produkte in dieser Kategorie.</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600 font-medium">Lade Produkte...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center p-6">
+      <div className="text-center max-w-md">
+        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">Fehler aufgetreten</h2>
+        <p className="text-red-600 mb-4">{error}</p>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+          Seite neu laden
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <header className="mb-8">
-          <h1 className="text-4xl font-semibold">{displayName}</h1>
-          <p className="text-gray-600 mt-2">Entdecke Artikel aus der Kategorie {displayName}</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <header className="mb-6">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+            {displayName}
+          </h1>
+          <p className="text-gray-600">Entdecke nachhaltige Mode aus der Kategorie {displayName}</p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((p: any) => {
-            const firstImage = getFirstProductImage(p);
-            return (
-              <div key={p.id} className={`border rounded overflow-hidden shadow-sm ${accentForCategory(category)}`}>
-                <Link href={`/products/${p.id}`} className="block">
-                  {firstImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={firstImage} alt={p.title} className="w-full h-48 object-cover" />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">Kein Bild</div>
-                  )}
-                </Link>
-                <div className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <Link href={`/products/${p.id}`} className="font-semibold text-lg text-gray-900">{p.title}</Link>
-                      <div className="text-sm text-gray-600">{Number(p.price).toFixed(2)} €</div>
-                    </div>
-                    <div className="text-sm text-gray-500">{p.size ?? ''}</div>
-                  </div>
+        <ProductFilters 
+          onFilterChange={handleFilterChange}
+          productCount={filteredItems.length}
+        />
 
-             
-                  <div className="mt-4">
-        )}
-                    <Link href={`/products/${p.id}`} className="block w-full text-center px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition">
+        {filteredItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 px-4">
+            <div className="w-32 h-32 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center mb-6 shadow-lg">
+              <svg className="w-16 h-16 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h3 className="text-3xl font-bold text-gray-800 mb-3">Keine Produkte gefunden</h3>
+            <p className="text-gray-600 text-center max-w-md mb-6">
+              {items.length === 0 
+                ? "In dieser Kategorie sind aktuell keine Produkte verfügbar. Schau bald wieder vorbei!"
+                : "Keine Produkte entsprechen deinen Filterkriterien. Versuche andere Filter oder setze die Suche zurück."}
+            </p>
+            {items.length > 0 && filteredItems.length === 0 && (
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+              >
+                Filter zurücksetzen
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filteredItems.map((p: any) => {
+              const firstImage = getFirstProductImage(p);
+              return (
+                <div key={p.id} className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                  <Link href={`/products/${p.id}`} className="block relative">
+                    {firstImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={firstImage} alt={p.title} className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ) : (
+                      <div className="w-full h-56 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                      <span className="text-green-600 font-bold text-sm">{Number(p.price).toFixed(2)} €</span>
+                    </div>
+                    {p.condition && (
+                      <div className="absolute top-3 left-3 bg-green-600/90 backdrop-blur-sm px-3 py-1 rounded-full">
+                        <span className="text-white text-xs font-semibold">{p.condition}</span>
+                      </div>
+                    )}
+                  </Link>
+                  <div className="p-4">
+                    <div className="mb-3">
+                      <Link href={`/products/${p.id}`} className="font-bold text-lg text-gray-900 hover:text-green-600 transition line-clamp-2 h-14">
+                        {p.title}
+                      </Link>
+                      {p.size && (
+                        <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
+                          Größe: {p.size}
+                        </span>
+                      )}
+                    </div>
+                    <Link 
+                      href={`/products/${p.id}`} 
+                      className="block w-full text-center px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all"
+                    >
                       Details ansehen
                     </Link>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
