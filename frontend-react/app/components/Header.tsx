@@ -126,14 +126,27 @@ export default function Header() {
 
         {/* RIGHT SIDE — Icons */}
         <div className="flex items-center gap-1">
+          {/* Sell Button */}
+          {isLoggedIn && (
+            <Link
+              href="/products/upload"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all hover:scale-105 shadow-sm hover:shadow-md font-medium text-xs tracking-wide group"
+            >
+              <svg className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span className="group-hover:tracking-wider transition-all">Verkaufen</span>
+            </Link>
+          )}
+
           {/* Favorite */}
           <button
             type="button"
             aria-label="Favoriten"
             onClick={() => handleNavigation('/favorites')}
-            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105"
+            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105 group"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <svg className="w-6 h-6 group-hover:fill-green-600 transition-all group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
@@ -143,9 +156,9 @@ export default function Header() {
             type="button"
             aria-label="Nachrichten"
             onClick={() => handleNavigation('/messages')}
-            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105"
+            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105 group"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <svg className="w-6 h-6 group-hover:rotate-12 transition-all group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </button>
@@ -155,9 +168,9 @@ export default function Header() {
             type="button"
             aria-label="Warenkorb"
             onClick={() => handleNavigation('/cart')}
-            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105 relative"
+            className="p-2 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105 relative group"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <svg className="w-6 h-6 group-hover:-rotate-6 transition-all group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
             </svg>
           </button>
@@ -174,20 +187,20 @@ export default function Header() {
                   router.push('/login');
                 }
               }}
-              className="p-1 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105"
+              className="p-1 rounded-xl hover:bg-green-50 text-green-600 hover:text-green-700 transition-all hover:scale-105 group"
             >
               {profileImageUrl ? (
                 <img
                   src={profileImageUrl}
                   alt="Profilbild"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-green-200"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-green-200 group-hover:border-green-400 transition-all group-hover:rotate-12"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '';
                     setProfileImageUrl(null);
                   }}
                 />
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <svg className="w-6 h-6 group-hover:rotate-12 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               )}

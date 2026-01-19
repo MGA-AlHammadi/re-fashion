@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchCart, updateCartQuantity, removeFromCart } from "../services/api";
-import { useToast } from "../components/Toast";
 import Link from "next/link";
 
 export default function CartPage() {
   const router = useRouter();
-  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,25 +49,22 @@ export default function CartPage() {
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { router.push('/login'); return; }
       console.error('Update quantity error:', e);
-      showToast('❌ Fehler beim Aktualisieren', 'error');
+      alert('Fehler beim Aktualisieren');
     }
   }
 
   async function removeItem(productId: number) {
     try {
       await removeFromCart(productId);
-      // Erst die Liste aktualisieren, dann Toast zeigen
       const updatedItems = items.filter(item => item.product.id !== productId);
       setItems(updatedItems);
-      showToast('✅ Produkt erfolgreich aus Warenkorb entfernt', 'success');
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { 
-        showToast('⚠️ Bitte melde dich an', 'warning');
-        setTimeout(() => router.push('/login'), 1500);
+        router.push('/login');
         return; 
       }
       console.error('Remove error:', e);
-      showToast('❌ Fehler beim Entfernen: ' + (e.message || 'Unbekannter Fehler'), 'error');
+      alert('Fehler beim Entfernen: ' + (e.message || 'Unbekannter Fehler'));
     }
   }
 
