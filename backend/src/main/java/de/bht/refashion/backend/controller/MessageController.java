@@ -46,4 +46,19 @@ public class MessageController {
         messageRepository.save(m);
         return ResponseEntity.ok(m);
     }
+    
+    @PostMapping("/mark-read/{senderId}")
+    public ResponseEntity<?> markAsRead(@RequestHeader("Authorization") String authHeader, @PathVariable Long senderId) {
+        String token = authHeader.substring(7);
+        User recipient = userService.getUserProfile(token);
+        User sender = userRepository.findById(senderId).orElse(null);
+        if (sender == null) return ResponseEntity.badRequest().body("Sender not found");
+        
+        List<Message> unreadMessages = messageRepository.findUnreadMessagesBetween(recipient, sender);
+        for (Message msg : unreadMessages) {
+            msg.setRead(true);
+        }
+        messageRepository.saveAll(unreadMessages);
+        return ResponseEntity.ok("Marked " + unreadMessages.size() + " messages as read");
+    }
 }

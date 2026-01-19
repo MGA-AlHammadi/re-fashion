@@ -99,6 +99,16 @@ export async function fetchProfile() {
   return res.json();
 }
 
+export async function markMessagesAsRead(senderId: number) {
+  const token = ensureToken();
+  const res = await fetch(`${API_BASE}/messages/mark-read/${senderId}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.text();
+}
+
 export async function fetchProduct(id: number) {
   const res = await fetch(`${API_BASE}/products/${id}`);
   if (!res.ok) throw new Error(await res.text());

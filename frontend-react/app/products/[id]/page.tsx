@@ -10,11 +10,21 @@ export default function ProductDetailPage() {
   const params = useParams();
   const id = Number(params.id);
   const [product, setProduct] = useState<any>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Helper function to parse multiple images
+  const getProductImages = (product: any): string[] => {
+    if (!product) return [];
+    const imageUrls = product.imageUrls || product.imageUrl || '';
+    if (!imageUrls) return [];
+    // Split by ||| delimiter for multiple images
+    return imageUrls.split('|||').filter((url: string) => url.trim());
+  };
 
   useEffect(() => { load(); }, [id]);
 
@@ -158,21 +168,82 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            {/* Image Section */}
+            {/* Image Gallery Section */}
             <div className="relative lg:col-span-1 bg-gradient-to-br from-gray-100 to-gray-200">
-              {product.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.imageUrl} alt={product.title} className="w-full h-[600px] object-cover" />
-              ) : (
-                <div className="w-full h-[600px] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                  <div className="text-center">
-                    <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="mt-4 text-gray-500 font-medium">Kein Bild</p>
+              {(() => {
+                const images = getProductImages(product);
+                if (images.length === 0) {
+                  return (
+                    <div className="w-full h-[600px] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <div className="text-center">
+                        <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="mt-4 text-gray-500 font-medium">Kein Bild verfügbar</p>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="relative">
+                    {/* Main Image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={images[currentImageIndex]} 
+                      alt={`${product.title} - Bild ${currentImageIndex + 1}`} 
+                      className="w-full h-[600px] object-cover"
+                    />
+                    
+                    {/* Navigation Arrows */}
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+                        >
+                          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+                        >
+                          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
+                    
+                    {/* Image Counter */}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium">
+                        {currentImageIndex + 1} / {images.length}
+                      </div>
+                    )}
+                    
+                    {/* Thumbnail Strip */}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 bg-white/90 p-2 rounded-xl shadow-lg">
+                        {images.map((img, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentImageIndex(idx)}
+                            className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                              idx === currentImageIndex ? 'border-green-600 scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
               <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
                 <span className="text-xs font-semibold text-green-700 uppercase tracking-wider">{product.category?.name ?? 'Produkt'}</span>
               </div>

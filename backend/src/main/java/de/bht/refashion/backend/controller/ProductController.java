@@ -71,7 +71,7 @@ public class ProductController {
         p.setPrice(req.getPrice());
         p.setSize(req.getSize());
         p.setCondition(req.getCondition());
-        p.setImageUrl(req.getImageUrl());
+        p.setImageUrls(req.getImageUrl()); // Keep backward compatibility
         p.setCategory(category);
         p.setOwner(ownerOpt.get());
 
@@ -109,7 +109,7 @@ public class ProductController {
         if (req.getPrice() != null) p.setPrice(req.getPrice());
         if (req.getSize() != null) p.setSize(req.getSize());
         if (req.getCondition() != null) p.setCondition(req.getCondition());
-        if (req.getImageUrl() != null) p.setImageUrl(req.getImageUrl());
+        if (req.getImageUrl() != null) p.setImageUrls(req.getImageUrl());
         if (req.getCategoryId() != null) {
             var cat = categoryRepository.findById(req.getCategoryId()).orElse(null);
             p.setCategory(cat);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchMessages, sendMessage, fetchProfile, searchUsers } from "../services/api";
+import { fetchMessages, sendMessage, fetchProfile, searchUsers, markMessagesAsRead } from "../services/api";
 
 export default function MessagesPage() {
   const router = useRouter();
@@ -80,6 +80,16 @@ export default function MessagesPage() {
     } catch (e: any) {
       console.error('Search error:', e);
       setSearchResults([]);
+    }
+  }
+  
+  async function handleSelectConversation(partnerId: number) {
+    setSelectedConversation(partnerId);
+    try {
+      await markMessagesAsRead(partnerId);
+      await load(); // Reload messages to update UI
+    } catch (e: any) {
+      console.error('Error marking messages as read:', e);
     }
   }
 
@@ -306,7 +316,7 @@ export default function MessagesPage() {
                     return (
                       <button
                         key={conv.partnerId}
-                        onClick={() => setSelectedConversation(conv.partnerId)}
+                        onClick={() => handleSelectConversation(conv.partnerId)}
                         className={`w-full p-4 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all ${ isActive ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500' : ''
                         }`}
                       >

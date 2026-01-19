@@ -20,6 +20,8 @@ public class Message {
     private String content;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+    
+    private boolean isRead = false;
 
     public Message() {}
 
@@ -67,5 +69,13 @@ public class Message {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public boolean isRead() {
+        return isRead;
+    }
+    
+    public void setRead(boolean read) {
+        this.isRead = read;
     }
 }

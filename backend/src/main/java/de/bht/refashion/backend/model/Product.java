@@ -22,7 +22,8 @@ public class Product {
 
     private String condition;
 
-    private String imageUrl;
+    @Column(columnDefinition = "TEXT")
+    private String imageUrls; // Comma-separated list of image URLs or Base64 strings
 
     @ManyToOne
     private Category category;
@@ -85,12 +86,12 @@ public class Product {
         this.condition = condition;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getImageUrls() {
+        return imageUrls;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageUrls(String imageUrls) {
+        this.imageUrls = imageUrls;
     }
 
     public Category getCategory() {

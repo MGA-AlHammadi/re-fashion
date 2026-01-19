@@ -14,4 +14,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     
     @Query("SELECT m FROM Message m WHERE (m.sender = :user OR m.recipient = :user) ORDER BY m.createdAt ASC")
     List<Message> findAllMessagesByUser(@Param("user") User user);
+    
+    @Query("SELECT m FROM Message m WHERE m.recipient = :recipient AND m.sender = :sender AND m.isRead = false")
+    List<Message> findUnreadMessagesBetween(@Param("recipient") User recipient, @Param("sender") User sender);
 }
