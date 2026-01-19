@@ -2,6 +2,7 @@ import "./globals.css";
 import { Metadata } from 'next';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { ToastProvider } from './components/Toast';
 
 export const metadata: Metadata = {
   title: 'Re-Fashion - Nachhaltige Mode',
@@ -16,12 +17,14 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className="bg-gray-100">
-        <Header />
-        
-        {/* MAIN CONTENT */}
-        <main className="max-w-6xl mx-auto pt-6">{children}</main>
+        <ToastProvider>
+          <Header />
+          
+          {/* MAIN CONTENT */}
+          <main className="max-w-6xl mx-auto pt-6">{children}</main>
 
-        <Footer />
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   );

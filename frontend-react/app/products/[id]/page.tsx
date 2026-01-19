@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { fetchProduct, addFavorite, addToCart, fetchProfile, deleteProduct } from "../../services/api";
+import { useToast } from "../../components/Toast";
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
+  const { showToast } = useToast();
   const [product, setProduct] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Helper function to parse multiple images
@@ -27,19 +28,6 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => { load(); }, [id]);
-
-  useEffect(() => {
-    if (toast.show) {
-      const timer = setTimeout(() => {
-        setToast({ show: false, message: '', type: 'success' });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.show]);
-
-  function showToast(message: string, type: 'success' | 'error' = 'success') {
-    setToast({ show: true, message, type });
-  }
 
   async function load() {
     setLoading(true);
@@ -62,20 +50,28 @@ export default function ProductDetailPage() {
   async function handleAddFavorite() {
     try {
       await addFavorite(id);
-      showToast('❤️ Zu Favoriten hinzugefügt!', 'success');
+      showToast('❤️ Erfolgreich zu deinen Favoriten hinzugefügt!', 'success');
     } catch (e: any) {
-      if (e?.message === 'NO_TOKEN') { router.push('/login'); return; }
-      showToast('Fehler beim Hinzufügen zu Favoriten', 'error');
+      if (e?.message === 'NO_TOKEN') { 
+        showToast('⚠️ Bitte melde dich an, um Favoriten zu speichern', 'warning');
+        setTimeout(() => router.push('/login'), 1500);
+        return; 
+      }
+      showToast('❌ Fehler beim Hinzufügen zu Favoriten', 'error');
     }
   }
 
   async function handleAddCart() {
     try {
       await addToCart(id, 1);
-      showToast('🛒 In den Warenkorb gelegt!', 'success');
+      showToast('🛒 Artikel wurde in deinen Warenkorb gelegt!', 'success');
     } catch (e: any) {
-      if (e?.message === 'NO_TOKEN') { router.push('/login'); return; }
-      showToast('Fehler beim Hinzufügen zum Warenkorb', 'error');
+      if (e?.message === 'NO_TOKEN') { 
+        showToast('⚠️ Bitte melde dich an, um einzukaufen', 'warning');
+        setTimeout(() => router.push('/login'), 1500);
+        return; 
+      }
+      showToast('❌ Fehler beim Hinzufügen zum Warenkorb', 'error');
     }
   }
 
@@ -83,14 +79,14 @@ export default function ProductDetailPage() {
     setShowDeleteModal(false);
     try {
       await deleteProduct(id);
-      showToast('🗑️ Produkt erfolgreich gelöscht!', 'success');
+      showToast('✅ Produkt erfolgreich gelöscht!', 'success');
       // Zur Category-Seite zurückleiten
       setTimeout(() => {
         const categoryName = product.category?.name?.toLowerCase() || 'women';
         router.push(`/collections/${categoryName}`);
       }, 1500);
     } catch (e: any) {
-      showToast('Fehler beim Löschen: ' + (e.message || String(e)), 'error');
+      showToast('❌ Fehler beim Löschen: ' + (e.message || String(e)), 'error');
     }
   }
 
@@ -131,36 +127,6 @@ export default function ProductDetailPage() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Toast Notification */}
-      {toast.show && (
-        <div className="fixed top-24 right-8 z-50 animate-slide-in-right">
-          <div className={`flex items-center space-x-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-sm transform transition-all duration-500 ${
-            toast.type === 'success' 
-              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
-              : 'bg-gradient-to-r from-red-500 to-rose-600 text-white'
-          }`}>
-            {toast.type === 'success' ? (
-              <svg className="w-6 h-6 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            )}
-            <span className="font-semibold text-lg">{toast.message}</span>
-            <button 
-              onClick={() => setToast({ show: false, message: '', type: 'success' })}
-              className="ml-4 hover:scale-110 transition-transform"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
           </div>
         </div>
       )}

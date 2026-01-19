@@ -3,29 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchFavorites, removeFavorite } from "../services/api";
+import { useToast } from "../components/Toast";
 import Link from "next/link";
 
 export default function FavoritesPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
 
   useEffect(() => { load(); }, []);
-
-  useEffect(() => {
-    if (toast.show) {
-      const timer = setTimeout(() => {
-        setToast({ show: false, message: '', type: 'success' });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.show]);
-
-  function showToast(message: string, type: 'success' | 'error' = 'success') {
-    setToast({ show: true, message, type });
-  }
 
   async function load() {
     setLoading(true);
@@ -45,10 +33,11 @@ export default function FavoritesPage() {
       // Erst die Liste aktualisieren, dann Toast zeigen
       const updatedItems = items.filter(item => item.id !== id);
       setItems(updatedItems);
-      showToast('✅ Aus Favoriten entfernt', 'success');
+      showToast('✅ Erfolgreich aus Favoriten entfernt', 'success');
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { 
-        router.push('/login'); 
+        showToast('⚠️ Bitte melde dich an', 'warning');
+        setTimeout(() => router.push('/login'), 1500);
         return; 
       }
       console.error('Remove favorite error:', e);

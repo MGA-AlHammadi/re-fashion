@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useToast } from "../../components/Toast";
 import Link from 'next/link';
 
 export default function UploadProductPage() {
+  const { showToast } = useToast();
   const [categories, setCategories] = useState<Array<any>>([]);
   const [form, setForm] = useState({
     title: "",
@@ -15,7 +17,7 @@ export default function UploadProductPage() {
     categoryId: ""
   });
   const [images, setImages] = useState<Array<{file: File, preview: string}>>([]);
-  const [status, setStatus] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,11 +29,9 @@ export default function UploadProductPage() {
     const t = globalThis.window !== undefined ? globalThis.window.localStorage.getItem('token') : null;
     setToken(t);
     if (!t) {
-      setStatus('⚠️ Nicht angemeldet! Bitte zuerst einloggen.');
-    } else {
-      setStatus(null); // Clear status if logged in
+      showToast('⚠️ Nicht angemeldet! Bitte zuerst einloggen.', 'warning');
     }
-  }, []);
+  }, [showToast]);
 
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -41,7 +41,7 @@ export default function UploadProductPage() {
     
     // Limit to 5 images
     if (images.length + files.length > 5) {
-      setStatus('Maximal 5 Bilder erlaubt');
+      showToast('⚠️ Maximal 5 Bilder erlaubt', 'warning');
       return;
     }
     
@@ -51,6 +51,7 @@ export default function UploadProductPage() {
     }));
     
     setImages([...images, ...newImages]);
+    showToast(`✅ ${files.length} Bild(er) hinzugefügt`, 'success');
   };
 
   const removeImage = (index: number) => {
@@ -71,16 +72,18 @@ export default function UploadProductPage() {
 
   const submit = async (e: any) => {
     e.preventDefault();
-    setStatus('loading');
+    setIsUploading(true);
 
     // basic client-side validation
     if (!form.title || !form.price || !form.categoryId) {
-      setStatus('Bitte fülle Titel, Preis und Kategorie aus.');
+      showToast('⚠️ Bitte fülle Titel, Preis und Kategorie aus.', 'warning');
+      setIsUploading(false);
       return;
     }
 
     if (!token) {
-      setStatus('Nicht angemeldet — bitte zuerst einloggen.');
+      showToast('⚠️ Nicht angemeldet — bitte zuerst einloggen.', 'warning');
+      setIsUploading(false);
       return;
     }
 
@@ -88,11 +91,13 @@ export default function UploadProductPage() {
     let imageUrlsString = form.imageUrl; // Keep old imageUrl as fallback
     if (images.length > 0) {
       try {
+        showToast('📷 Bilder werden verarbeitet...', 'info');
         const base64Images = await Promise.all(images.map(img => convertToBase64(img.file)));
         imageUrlsString = base64Images.join('|||'); // Use ||| as delimiter
       } catch (err) {
         console.error('Error converting images:', err);
-        setStatus('Fehler beim Verarbeiten der Bilder');
+        showToast('❌ Fehler beim Verarbeiten der Bilder', 'error');
+        setIsUploading(false);
         return;
       }
     }
@@ -112,7 +117,8 @@ export default function UploadProductPage() {
       const tokenLocal = globalThis.window?.localStorage?.getItem('token') ?? null;
       
       if (!tokenLocal) {
-        setStatus('Kein Token gefunden - bitte neu einloggen.');
+        showToast('❌ Kein Token gefunden - bitte neu einloggen.', 'error');
+        setIsUploading(false);
         return;
       }
       
@@ -133,17 +139,19 @@ export default function UploadProductPage() {
       if (res.ok) {
         const data = await res.json().catch(() => null);
         console.log('Upload successful', data);
-        setStatus('success');
+        showToast('✅ Produkt erfolgreich veröffentlicht!', 'success');
         setForm({ title: '', description: '', price: '', size: '', condition: '', imageUrl: '', categoryId: '' });
         setImages([]); // Clear images
       } else {
         const text = await res.text().catch(() => 'Unable to read response');
         console.error('Upload failed', res.status, text);
-        setStatus(`Fehler ${res.status}: ${text.substring(0, 100)}`);
+        showToast(`❌ Fehler ${res.status}: ${text.substring(0, 100)}`, 'error');
       }
     } catch (err: any) {
       console.error('Upload failed:', err);
-      setStatus(`Fehler: ${err?.message || 'Unbekannter Fehler'}`);
+      showToast(`❌ Fehler: ${err?.message || 'Unbekannter Fehler'}`, 'error');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -264,12 +272,22 @@ export default function UploadProductPage() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <button disabled={status === 'loading' || !token} className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded">
-                  {status === 'loading' ? 'Hochladen...' : 'Produkt veröffentlichen'}
+                <button 
+                  disabled={isUploading || !token} 
+                  className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded font-semibold transition-all transform hover:scale-105 flex items-center gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Wird hochgeladen...</span>
+                    </>
+                  ) : (
+                    'Produkt veröffentlichen'
+                  )}
                 </button>
-                {status && (
-                  <div className={`text-sm ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>{status}</div>
-                )}
               </div>
               <div className="text-sm text-gray-500">
                 {token ? 'Gute Fotos und Beschreibung erhöhen die Chance.' : (

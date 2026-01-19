@@ -3,31 +3,19 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchCart, updateCartQuantity, removeFromCart } from "../services/api";
+import { useToast } from "../components/Toast";
 import Link from "next/link";
 
 export default function CartPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
     load();
   }, []);
-
-  useEffect(() => {
-    if (toast.show) {
-      const timer = setTimeout(() => {
-        setToast({ show: false, message: '', type: 'success' });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.show]);
-
-  function showToast(message: string, type: 'success' | 'error' = 'success') {
-    setToast({ show: true, message, type });
-  }
 
   async function load() {
     setLoading(true);
@@ -73,10 +61,11 @@ export default function CartPage() {
       // Erst die Liste aktualisieren, dann Toast zeigen
       const updatedItems = items.filter(item => item.product.id !== productId);
       setItems(updatedItems);
-      showToast('✅ Produkt aus Warenkorb entfernt', 'success');
+      showToast('✅ Produkt erfolgreich aus Warenkorb entfernt', 'success');
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { 
-        router.push('/login'); 
+        showToast('⚠️ Bitte melde dich an', 'warning');
+        setTimeout(() => router.push('/login'), 1500);
         return; 
       }
       console.error('Remove error:', e);
