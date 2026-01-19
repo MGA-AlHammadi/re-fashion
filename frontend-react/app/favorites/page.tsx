@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchFavorites, removeFavorite } from "../services/api";
-import { useToast } from "../components/Toast";
 import Link from "next/link";
 
 export default function FavoritesPage() {
   const router = useRouter();
-  const { showToast } = useToast();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,18 +28,15 @@ export default function FavoritesPage() {
   async function remove(id: number) {
     try {
       await removeFavorite(id);
-      // Erst die Liste aktualisieren, dann Toast zeigen
       const updatedItems = items.filter(item => item.id !== id);
       setItems(updatedItems);
-      showToast('✅ Erfolgreich aus Favoriten entfernt', 'success');
     } catch (e: any) {
       if (e?.message === "NO_TOKEN") { 
-        showToast('⚠️ Bitte melde dich an', 'warning');
-        setTimeout(() => router.push('/login'), 1500);
+        router.push('/login');
         return; 
       }
       console.error('Remove favorite error:', e);
-      showToast('❌ Fehler beim Entfernen: ' + (e.message || 'Unbekannter Fehler'), 'error');
+      alert('Fehler beim Entfernen: ' + (e.message || 'Unbekannter Fehler'));
     }
   }
 

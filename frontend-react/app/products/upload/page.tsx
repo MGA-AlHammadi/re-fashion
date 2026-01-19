@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useToast } from "../../components/Toast";
 import Link from 'next/link';
 
 export default function UploadProductPage() {
-  const { showToast } = useToast();
   const [categories, setCategories] = useState<Array<any>>([]);
   const [form, setForm] = useState({
     title: "",
@@ -28,10 +26,7 @@ export default function UploadProductPage() {
     // check for token
     const t = globalThis.window !== undefined ? globalThis.window.localStorage.getItem('token') : null;
     setToken(t);
-    if (!t) {
-      showToast('⚠️ Nicht angemeldet! Bitte zuerst einloggen.', 'warning');
-    }
-  }, [showToast]);
+  }, []);
 
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -41,7 +36,7 @@ export default function UploadProductPage() {
     
     // Limit to 5 images
     if (images.length + files.length > 5) {
-      showToast('⚠️ Maximal 5 Bilder erlaubt', 'warning');
+      alert('Maximal 5 Bilder erlaubt');
       return;
     }
     
@@ -51,7 +46,6 @@ export default function UploadProductPage() {
     }));
     
     setImages([...images, ...newImages]);
-    showToast(`✅ ${files.length} Bild(er) hinzugefügt`, 'success');
   };
 
   const removeImage = (index: number) => {
@@ -76,13 +70,13 @@ export default function UploadProductPage() {
 
     // basic client-side validation
     if (!form.title || !form.price || !form.categoryId) {
-      showToast('⚠️ Bitte fülle Titel, Preis und Kategorie aus.', 'warning');
+      alert('Bitte fülle Titel, Preis und Kategorie aus.');
       setIsUploading(false);
       return;
     }
 
     if (!token) {
-      showToast('⚠️ Nicht angemeldet — bitte zuerst einloggen.', 'warning');
+      alert('Nicht angemeldet — bitte zuerst einloggen.');
       setIsUploading(false);
       return;
     }
@@ -91,12 +85,11 @@ export default function UploadProductPage() {
     let imageUrlsString = form.imageUrl; // Keep old imageUrl as fallback
     if (images.length > 0) {
       try {
-        showToast('📷 Bilder werden verarbeitet...', 'info');
         const base64Images = await Promise.all(images.map(img => convertToBase64(img.file)));
         imageUrlsString = base64Images.join('|||'); // Use ||| as delimiter
       } catch (err) {
         console.error('Error converting images:', err);
-        showToast('❌ Fehler beim Verarbeiten der Bilder', 'error');
+        alert('Fehler beim Verarbeiten der Bilder');
         setIsUploading(false);
         return;
       }
@@ -117,7 +110,7 @@ export default function UploadProductPage() {
       const tokenLocal = globalThis.window?.localStorage?.getItem('token') ?? null;
       
       if (!tokenLocal) {
-        showToast('❌ Kein Token gefunden - bitte neu einloggen.', 'error');
+        alert('Kein Token gefunden - bitte neu einloggen.');
         setIsUploading(false);
         return;
       }
@@ -139,17 +132,17 @@ export default function UploadProductPage() {
       if (res.ok) {
         const data = await res.json().catch(() => null);
         console.log('Upload successful', data);
-        showToast('✅ Produkt erfolgreich veröffentlicht!', 'success');
+        alert('Produkt erfolgreich veröffentlicht!');
         setForm({ title: '', description: '', price: '', size: '', condition: '', imageUrl: '', categoryId: '' });
         setImages([]); // Clear images
       } else {
         const text = await res.text().catch(() => 'Unable to read response');
         console.error('Upload failed', res.status, text);
-        showToast(`❌ Fehler ${res.status}: ${text.substring(0, 100)}`, 'error');
+        alert(`Fehler ${res.status}: ${text.substring(0, 100)}`);
       }
     } catch (err: any) {
       console.error('Upload failed:', err);
-      showToast(`❌ Fehler: ${err?.message || 'Unbekannter Fehler'}`, 'error');
+      alert(`Fehler: ${err?.message || 'Unbekannter Fehler'}`);
     } finally {
       setIsUploading(false);
     }

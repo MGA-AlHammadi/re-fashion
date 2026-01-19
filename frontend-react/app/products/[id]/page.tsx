@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { fetchProduct, addFavorite, addToCart, fetchProfile, deleteProduct } from "../../services/api";
-import { useToast } from "../../components/Toast";
 
 export default function ProductDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
-  const { showToast } = useToast();
   const [product, setProduct] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -50,28 +48,24 @@ export default function ProductDetailPage() {
   async function handleAddFavorite() {
     try {
       await addFavorite(id);
-      showToast('❤️ Erfolgreich zu deinen Favoriten hinzugefügt!', 'success');
     } catch (e: any) {
       if (e?.message === 'NO_TOKEN') { 
-        showToast('⚠️ Bitte melde dich an, um Favoriten zu speichern', 'warning');
-        setTimeout(() => router.push('/login'), 1500);
+        router.push('/login');
         return; 
       }
-      showToast('❌ Fehler beim Hinzufügen zu Favoriten', 'error');
+      console.error('Add to favorites failed:', e);
     }
   }
 
   async function handleAddCart() {
     try {
       await addToCart(id, 1);
-      showToast('🛒 Artikel wurde in deinen Warenkorb gelegt!', 'success');
     } catch (e: any) {
       if (e?.message === 'NO_TOKEN') { 
-        showToast('⚠️ Bitte melde dich an, um einzukaufen', 'warning');
-        setTimeout(() => router.push('/login'), 1500);
+        router.push('/login');
         return; 
       }
-      showToast('❌ Fehler beim Hinzufügen zum Warenkorb', 'error');
+      console.error('Add to cart failed:', e);
     }
   }
 
@@ -79,14 +73,11 @@ export default function ProductDetailPage() {
     setShowDeleteModal(false);
     try {
       await deleteProduct(id);
-      showToast('✅ Produkt erfolgreich gelöscht!', 'success');
-      // Zur Category-Seite zurückleiten
-      setTimeout(() => {
-        const categoryName = product.category?.name?.toLowerCase() || 'women';
-        router.push(`/collections/${categoryName}`);
-      }, 1500);
+      const categoryName = product.category?.name?.toLowerCase() || 'women';
+      router.push(`/collections/${categoryName}`);
     } catch (e: any) {
-      showToast('❌ Fehler beim Löschen: ' + (e.message || String(e)), 'error');
+      console.error('Delete failed:', e);
+      alert('Fehler beim Löschen: ' + (e.message || String(e)));
     }
   }
 
