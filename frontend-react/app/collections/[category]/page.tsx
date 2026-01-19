@@ -13,6 +13,15 @@ function accentForCategory(cat: string) {
   return 'bg-gray-50 border-gray-200';
 }
 
+// Helper function to get first image from product
+function getFirstProductImage(product: any): string | null {
+  const imageUrls = product.imageUrls || product.imageUrl || '';
+  if (!imageUrls) return null;
+  // Split by ||| delimiter for multiple images, return first one
+  const images = imageUrls.split('|||').filter((url: string) => url.trim());
+  return images.length > 0 ? images[0] : null;
+}
+
 export default function CategoryPage({ params }: { readonly params: { readonly category: string } }) {
   const category = params.category;
   const displayName = category.replaceAll('-', ' ').toUpperCase();
@@ -48,12 +57,13 @@ export default function CategoryPage({ params }: { readonly params: { readonly c
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((p: any) => {
+            const firstImage = getFirstProductImage(p);
             return (
               <div key={p.id} className={`border rounded overflow-hidden shadow-sm ${accentForCategory(category)}`}>
                 <Link href={`/products/${p.id}`} className="block">
-                  {p.imageUrl ? (
+                  {firstImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.imageUrl} alt={p.title} className="w-full h-48 object-cover" />
+                    <img src={firstImage} alt={p.title} className="w-full h-48 object-cover" />
                   ) : (
                     <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">Kein Bild</div>
                   )}

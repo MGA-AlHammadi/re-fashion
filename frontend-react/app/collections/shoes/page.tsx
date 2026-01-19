@@ -32,11 +32,15 @@ export default async function ShoesPage() {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-            {products.map((p: any) => (
+            {products.map((p: any) => {
+              const imageUrls = p.imageUrls || p.imageUrl || '';
+              const firstImage = imageUrls ? imageUrls.split('|||')[0] : '/placeholder.png';
+              
+              return (
               <div key={p.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
                 <div className="relative h-64 bg-gradient-to-br from-slate-100 via-gray-100 to-slate-200 overflow-hidden">
                   <img 
-                    src={p.imageUrl || '/placeholder.png'} 
+                    src={firstImage} 
                     alt={p.title} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   />
@@ -55,7 +59,8 @@ export default async function ShoesPage() {
                   </Link>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
