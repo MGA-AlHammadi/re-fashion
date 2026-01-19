@@ -138,15 +138,20 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Products List */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((it: any) => (
+            {items.map((it: any) => {
+              // Get first image from imageUrls or fallback
+              const imageUrls = it.product.imageUrls || it.product.imageUrl || '';
+              const firstImage = imageUrls ? imageUrls.split('|||')[0] : null;
+              
+              return (
               <div key={it.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-6 group">
                 <div className="flex items-center space-x-6">
                   {/* Product Image */}
                   <Link href={`/products/${it.product.id}`} className="flex-shrink-0">
                     <div className="w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                      {it.product.imageUrl ? (
+                      {firstImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={it.product.imageUrl} alt={it.product.title} className="w-full h-full object-cover" />
+                        <img src={firstImage} alt={it.product.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,7 +208,8 @@ export default function CartPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
 
           {/* Summary Card */}

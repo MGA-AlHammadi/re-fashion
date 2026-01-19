@@ -108,15 +108,20 @@ export default function FavoritesPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map((p: any) => (
+          {items.map((p: any) => {
+            // Get first image from imageUrls or fallback
+            const imageUrls = p.imageUrls || p.imageUrl || '';
+            const firstImage = imageUrls ? imageUrls.split('|||')[0] : null;
+            
+            return (
             <div key={p.id} className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
               {/* Product Image */}
               <Link href={`/products/${p.id}`} className="block relative overflow-hidden">
                 <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
-                  {p.imageUrl ? (
+                  {firstImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img 
-                      src={p.imageUrl} 
+                      src={firstImage} 
                       alt={p.title} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     />
@@ -172,7 +177,8 @@ export default function FavoritesPage() {
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </div>
     </div>
