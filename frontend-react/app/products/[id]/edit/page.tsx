@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchProduct, updateProduct } from "../../../services/api";
 
 export default function EditProductPage({ params }: any) {
   const router = useRouter();
-  const id = Number(params.id);
+  const resolvedParams = use(params);
+  const id = Number(resolvedParams.id);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<any>({ title: '', description: '', price: '', size: '', condition: '', imageUrl: '', categoryId: '' });

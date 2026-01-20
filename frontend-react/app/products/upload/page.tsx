@@ -17,6 +17,7 @@ export default function UploadProductPage() {
   const [images, setImages] = useState<Array<{file: File, preview: string}>>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
   useEffect(() => {
     fetch('http://localhost:8080/api/categories')
@@ -28,6 +29,13 @@ export default function UploadProductPage() {
     setToken(t);
   }, []);
 
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleImageUpload = (e: any) => {
@@ -36,7 +44,7 @@ export default function UploadProductPage() {
     
     // Limit to 5 images
     if (images.length + files.length > 5) {
-      alert('Maximal 5 Bilder erlaubt');
+      setToast({message: 'Maximal 5 Bilder erlaubt', type: 'error'});
       return;
     }
     
@@ -70,13 +78,13 @@ export default function UploadProductPage() {
 
     // basic client-side validation
     if (!form.title || !form.price || !form.categoryId) {
-      alert('Bitte fülle Titel, Preis und Kategorie aus.');
+      setToast({message: 'Bitte fülle Titel, Preis und Kategorie aus.', type: 'error'});
       setIsUploading(false);
       return;
     }
 
     if (!token) {
-      alert('Nicht angemeldet — bitte zuerst einloggen.');
+      setToast({message: 'Nicht angemeldet — bitte zuerst einloggen.', type: 'error'});
       setIsUploading(false);
       return;
     }
@@ -89,7 +97,7 @@ export default function UploadProductPage() {
         imageUrlsString = base64Images.join('|||'); // Use ||| as delimiter
       } catch (err) {
         console.error('Error converting images:', err);
-        alert('Fehler beim Verarbeiten der Bilder');
+        setToast({message: 'Fehler beim Verarbeiten der Bilder', type: 'error'});
         setIsUploading(false);
         return;
       }
@@ -110,7 +118,7 @@ export default function UploadProductPage() {
       const tokenLocal = globalThis.window?.localStorage?.getItem('token') ?? null;
       
       if (!tokenLocal) {
-        alert('Kein Token gefunden - bitte neu einloggen.');
+        setToast({message: 'Kein Token gefunden - bitte neu einloggen.', type: 'error'});
         setIsUploading(false);
         return;
       }
@@ -132,17 +140,17 @@ export default function UploadProductPage() {
       if (res.ok) {
         const data = await res.json().catch(() => null);
         console.log('Upload successful', data);
-        alert('Produkt erfolgreich veröffentlicht!');
+        setToast({message: 'Produkt erfolgreich veröffentlicht!', type: 'success'});
         setForm({ title: '', description: '', price: '', size: '', condition: '', imageUrl: '', categoryId: '' });
         setImages([]); // Clear images
       } else {
         const text = await res.text().catch(() => 'Unable to read response');
         console.error('Upload failed', res.status, text);
-        alert(`Fehler ${res.status}: ${text.substring(0, 100)}`);
+        setToast({message: `Fehler ${res.status}: ${text.substring(0, 100)}`, type: 'error'});
       }
     } catch (err: any) {
       console.error('Upload failed:', err);
-      alert(`Fehler: ${err?.message || 'Unbekannter Fehler'}`);
+      setToast({message: `Fehler: ${err?.message || 'Unbekannter Fehler'}`, type: 'error'});
     } finally {
       setIsUploading(false);
     }
@@ -316,6 +324,28 @@ export default function UploadProductPage() {
             </div>
           </div>
         </div>
+
+        {/* Toast Benachrichtigung */}
+        {toast && (
+          <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 px-8 py-4 rounded-lg shadow-2xl z-50 transition-all duration-300 max-w-md ${
+            toast.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            <div className="flex items-center space-x-3">
+              {toast.type === 'success' ? (
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+              <span className="font-medium">{toast.message}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

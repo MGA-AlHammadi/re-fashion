@@ -11,7 +11,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-green-700">Persönliche Info</h3>
             <ul className="space-y-2 text-sm">
               <li><Link href="/profile" className="text-green-600 hover:text-green-800 transition-colors">Mein Profil</Link></li>
-              <li><Link href="/orders" className="text-green-600 hover:text-green-800 transition-colors">Meine Bestellungen</Link></li>
+              <li><Link href="/cart" className="text-green-600 hover:text-green-800 transition-colors">Meine Bestellungen</Link></li>
               <li><Link href="/favorites" className="text-green-600 hover:text-green-800 transition-colors">Favoriten</Link></li>
               <li><Link href="/settings" className="text-green-600 hover:text-green-800 transition-colors">Einstellungen</Link></li>
             </ul>
