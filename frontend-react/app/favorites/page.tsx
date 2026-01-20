@@ -71,24 +71,66 @@ export default function FavoritesPage() {
             <p className="text-gray-600 text-lg">Deine geliebten Produkte</p>
           </div>
           
-          <div className="bg-white rounded-3xl shadow-2xl p-12 text-center">
-            <div className="w-32 h-32 bg-gradient-to-br from-rose-100 to-pink-200 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-16 h-16 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-              </svg>
+          <div className="bg-white rounded-3xl shadow-2xl p-12 text-center relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-rose-100 rounded-full -mr-32 -mt-32 opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-100 rounded-full -ml-24 -mb-24 opacity-50"></div>
+            
+            <div className="relative z-10">
+              {/* Animated heart */}
+              <div className="relative w-40 h-40 mx-auto mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-rose-100 to-pink-200 rounded-full animate-pulse"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-20 h-20 text-rose-600 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Noch keine Favoriten</h2>
+              <p className="text-gray-600 text-lg mb-2">Dein Herz wartet auf tolle Entdeckungen!</p>
+              <p className="text-sm text-gray-500 mb-10 max-w-md mx-auto">Speichere deine Lieblingsprodukte mit einem Klick und finde sie jederzeit wieder</p>
+              
+              {/* Call to Actions */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link 
+                  href="/collections" 
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-2xl hover:from-rose-600 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Produkte entdecken
+                </Link>
+                
+                <Link 
+                  href="/cart" 
+                  className="inline-flex items-center px-8 py-4 bg-white text-rose-600 font-semibold rounded-2xl border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 transform hover:scale-105 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Zum Warenkorb
+                </Link>
+              </div>
+              
+              {/* Tips box */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-6 max-w-2xl mx-auto">
+                  <div className="flex items-start gap-4 text-left">
+                    <div className="flex-shrink-0 w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">💡 Tipp: So funktionieren Favoriten</h3>
+                      <p className="text-sm text-gray-600">Klicke auf das Herz-Symbol bei einem Produkt, um es zu deinen Favoriten hinzuzufügen. So hast du all deine Lieblingsteile immer griffbereit!</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Du hast noch keine Favoriten</h2>
-            <p className="text-gray-600 mb-2">Entdecke tolle Produkte und markiere sie als Favoriten!</p>
-            <p className="text-sm text-gray-500 mb-8">Stöbere in unseren Kollektionen und merke dir deine Lieblingsteile</p>
-            <Link 
-              href="/collections" 
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold rounded-2xl hover:from-rose-600 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Zu den Kollektionen
-            </Link>
           </div>
         </div>
       </div>

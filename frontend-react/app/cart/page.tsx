@@ -99,24 +99,56 @@ export default function CartPage() {
             <p className="text-gray-600 text-lg">Deine ausgewählten Produkte</p>
           </div>
           
-          <div className="bg-white rounded-3xl shadow-2xl p-12 text-center">
-            <div className="w-32 h-32 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-16 h-16 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+          <div className="bg-white rounded-3xl shadow-2xl p-12 text-center relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-100 rounded-full -mr-32 -mt-32 opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-100 rounded-full -ml-24 -mb-24 opacity-50"></div>
+            
+            <div className="relative z-10">
+              <div className="w-40 h-40 bg-gradient-to-br from-emerald-100 to-teal-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <svg className="w-20 h-20 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+              </div>
+              
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Dein Warenkorb ist leer</h2>
+              <p className="text-gray-600 text-lg mb-2">Zeit, tolle Produkte zu entdecken!</p>
+              <p className="text-sm text-gray-500 mb-10 max-w-md mx-auto">Durchsuche unsere nachhaltigen Kollektionen und finde deine Lieblingsstücke für einen bewussten Stil</p>
+              
+              {/* Multiple CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link 
+                  href="/collections" 
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Weiter einkaufen
+                </Link>
+                
+                <Link 
+                  href="/favorites" 
+                  className="inline-flex items-center px-8 py-4 bg-white text-emerald-600 font-semibold rounded-2xl border-2 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 transform hover:scale-105 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                  </svg>
+                  Meine Favoriten
+                </Link>
+              </div>
+              
+              {/* Quick links */}
+              <div className="mt-12 pt-8 border-t border-gray-200">
+                <p className="text-sm text-gray-500 mb-4">Beliebte Kategorien:</p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Link href="/collections/women" className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium">Damen</Link>
+                  <Link href="/collections/men" className="px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors text-sm font-medium">Herren</Link>
+                  <Link href="/collections/shoes" className="px-4 py-2 bg-cyan-50 text-cyan-700 rounded-lg hover:bg-cyan-100 transition-colors text-sm font-medium">Schuhe</Link>
+                  <Link href="/collections/kids" className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium">Kinder</Link>
+                </div>
+              </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Dein Warenkorb ist leer</h2>
-            <p className="text-gray-600 mb-2">Füge tolle Produkte hinzu und starte dein Shopping-Erlebnis!</p>
-            <p className="text-sm text-gray-500 mb-8">Durchsuche unsere Kollektionen und finde deine Lieblingsstücke</p>
-            <Link 
-              href="/collections" 
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Weiter einkaufen
-            </Link>
           </div>
         </div>
       </div>
