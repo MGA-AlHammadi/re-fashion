@@ -21,11 +21,13 @@ export default function ProfilePage() {
     city: ""
   });
   const [toast, setToast] = useState<{message: string; type: 'success' | 'error'} | null>(null);
+  const [hasToken, setHasToken] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    setHasToken(!!token);
     console.log("Token gefunden:", token ? "Ja" : "Nein");
     
     if (!token) {
@@ -62,6 +64,7 @@ export default function ProfilePage() {
         if (res.ok) {
           const data = await res.json();
           console.log("Erhaltene Daten:", data);
+          console.log("ProfileImageUrl vom Backend:", data.profileImageUrl);
           setUserData(data);
           setEditForm({
             name: data.name || "",
@@ -154,21 +157,67 @@ export default function ProfilePage() {
           setUserData(updatedUser);
           setToast({message: "Profilbild erfolgreich aktualisiert!", type: 'success'});
         } else {
-          throw new Error("Upload failed");
+          const errorText = await res.text();
+          console.error("Backend Fehler beim Upload:", res.status, errorText);
+          throw new Error(`Upload failed: ${errorText}`);
         }
       } catch (error: any) {
+        console.error("Fehler beim Hochladen:", error);
         // Immer lokal aktualisieren für Demo
         setUserData({
           ...userData!,
           profileImageUrl: imageUrl
         });
-        setToast({message: "Profilbild aktualisiert!", type: 'success'});
+        setToast({message: "Profilbild aktualisiert! (Lokal)", type: 'success'});
       } finally {
         setIsUploadingImage(false);
       }
     };
 
     reader.readAsDataURL(file);
+  };
+
+  const handleDeleteImage = async () => {
+    setIsUploadingImage(true);
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch("http://localhost:8080/api/profile/upload-image", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ imageUrl: "" }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUserData(updatedUser);
+        setToast({message: "Profilbild wurde gelöscht", type: 'success'});
+      } else {
+        const errorText = await res.text();
+        console.error("Backend Fehler beim Löschen:", res.status, errorText);
+        throw new Error(`Delete failed: ${errorText}`);
+      }
+    } catch (error: any) {
+      console.error("Fehler beim Löschen:", error);
+      // Immer lokal aktualisieren für Demo
+      setUserData({
+        ...userData!,
+        profileImageUrl: undefined
+      });
+      setToast({message: "Profilbild gelöscht! (Lokal)", type: 'success'});
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSave = async () => {
@@ -201,10 +250,10 @@ export default function ProfilePage() {
         const updatedUser = await res.json();
         setUserData(updatedUser);
         setIsEditing(false);
-        setToast({message: "Profil erfolgreich aktualisiert!", type: 'success'});
+        alert("Profil erfolgreich aktualisiert!");
       } else {
         const errorMsg = await res.text();
-        setToast({message: "Fehler: " + errorMsg, type: 'error'});
+        alert("Fehler: " + errorMsg);
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -217,7 +266,7 @@ export default function ProfilePage() {
           city: editForm.city
         });
         setIsEditing(false);
-        setToast({message: "Profil aktualisiert!", type: 'success'});
+        alert("Profil aktualisiert!");
       }
     } finally {
       setIsLoading(false);
@@ -287,7 +336,7 @@ export default function ProfilePage() {
           </button>
           
           <div className="text-xs text-gray-400 mt-4">
-            <p>Token: {localStorage.getItem("token") ? "Vorhanden" : "Fehlt"}</p>
+            <p suppressHydrationWarning>Token: {hasToken ? "Vorhanden" : "Fehlt"}</p>
             <p>Backend: http://localhost:8080</p>
           </div>
         </div>
@@ -312,6 +361,10 @@ export default function ProfilePage() {
                       src={userData.profileImageUrl} 
                       alt="Profilbild" 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Fehler beim Laden des Profilbildes:", userData.profileImageUrl);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full bg-white/20 flex items-center justify-center">
@@ -338,6 +391,20 @@ export default function ProfilePage() {
                     </svg>
                   )}
                 </button>
+                
+                {/* Delete Button (nur anzeigen wenn Bild vorhanden) */}
+                {userData.profileImageUrl && (
+                  <button
+                    onClick={handleDeleteImage}
+                    disabled={isUploadingImage}
+                    className="absolute bottom-0 left-0 bg-white text-red-600 p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Profilbild löschen"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                )}
                 
                 <input
                   ref={fileInputRef}
@@ -463,7 +530,10 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Schnellzugriff</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             
-            <button className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group">
+            <button 
+              onClick={() => router.push('/favorites')}
+              className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group"
+            >
               <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -475,7 +545,10 @@ export default function ProfilePage() {
               </div>
             </button>
 
-            <button className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group">
+            <button 
+              onClick={() => router.push('/cart')}
+              className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group"
+            >
               <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -487,7 +560,10 @@ export default function ProfilePage() {
               </div>
             </button>
 
-            <button className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group">
+            <button 
+              onClick={() => router.push('/messages')}
+              className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group"
+            >
               <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -499,7 +575,10 @@ export default function ProfilePage() {
               </div>
             </button>
 
-            <button className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group">
+            <button 
+              onClick={() => router.push('/settings')}
+              className="p-6 border-2 border-green-300 rounded-lg hover:bg-green-50 hover:border-green-400 transition-all flex items-center space-x-4 group"
+            >
               <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
