@@ -1,0 +1,8 @@
+### Login an bestehendem Benutzer
+POST http://localhost:8080/api/login
+Content-Type: application/json
+
+{
+  "email": "mo@test.de",
+  "password": "123456"
+}

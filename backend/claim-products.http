@@ -1,0 +1,4 @@
+### Claim orphaned products (Produkte ohne Owner dem aktuellen Benutzer zuweisen)
+POST http://localhost:8080/api/products/claim-orphaned
+Authorization: Bearer {{token}}
+Content-Type: application/json

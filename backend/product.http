@@ -1,0 +1,55 @@
+### Get all categories
+GET http://localhost:8080/api/categories
+
+### Get category by ID
+GET http://localhost:8080/api/categories/1
+
+### Initialize default categories
+POST http://localhost:8080/api/categories/initialize
+
+### Get all products
+GET http://localhost:8080/api/products
+
+### Get product by ID
+GET http://localhost:8080/api/products/1
+
+### Get my products (requires authentication)
+GET http://localhost:8080/api/products/my-products
+Authorization: Bearer YOUR_JWT_TOKEN
+
+### Search products by title
+GET http://localhost:8080/api/products/search?title=shirt
+
+### Create new product (requires authentication)
+POST http://localhost:8080/api/products
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "title": "Blue Denim Jacket",
+  "description": "High-quality denim jacket in excellent condition",
+  "price": 45.99,
+  "size": "M",
+  "condition": "Good",
+  "imageUrl": "https://example.com/image.jpg",
+  "categoryId": 1
+}
+
+### Update product (requires authentication)
+PUT http://localhost:8080/api/products/1
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "title": "Updated Blue Denim Jacket",
+  "description": "Updated description",
+  "price": 40.99,
+  "size": "M",
+  "condition": "Very Good",
+  "imageUrl": "https://example.com/updated-image.jpg",
+  "categoryId": 1
+}
+
+### Delete product (requires authentication)
+DELETE http://localhost:8080/api/products/1
+Authorization: Bearer YOUR_JWT_TOKEN
