@@ -42,7 +42,7 @@ public class ProductController {
 
     @GetMapping("/category/{name}")
     public List<Product> byCategory(@PathVariable String name) {
-        return productRepository.findByCategory_Name(name);
+        return productRepository.findByCategory_NameIgnoreCase(name);
     }
 
     @PostMapping
