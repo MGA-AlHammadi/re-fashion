@@ -15,6 +15,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
   // Helper function to parse multiple images
   const getProductImages = (product: any): string[] => {
@@ -26,6 +27,13 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => { load(); }, [id]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   async function load() {
     setLoading(true);
@@ -48,11 +56,13 @@ export default function ProductDetailPage() {
   async function handleAddFavorite() {
     try {
       await addFavorite(id);
+      setToast({message: '❤️ Zu Favoriten hinzugefügt!', type: 'success'});
     } catch (e: any) {
       if (e?.message === 'NO_TOKEN') { 
         router.push('/login');
         return; 
       }
+      setToast({message: 'Fehler beim Hinzufügen zu Favoriten', type: 'error'});
       console.error('Add to favorites failed:', e);
     }
   }
@@ -60,11 +70,13 @@ export default function ProductDetailPage() {
   async function handleAddCart() {
     try {
       await addToCart(id, 1);
+      setToast({message: '🛒 Zum Warenkorb hinzugefügt!', type: 'success'});
     } catch (e: any) {
       if (e?.message === 'NO_TOKEN') { 
         router.push('/login');
         return; 
       }
+      setToast({message: 'Fehler beim Hinzufügen zum Warenkorb', type: 'error'});
       console.error('Add to cart failed:', e);
     }
   }
@@ -309,6 +321,28 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+      
+      {/* Toast Benachrichtigung */}
+      {toast && (
+        <div className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl z-50 transform transition-all duration-300 animate-slide-in-bottom ${
+          toast.type === 'success' 
+            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
+            : 'bg-gradient-to-r from-red-500 to-rose-600 text-white'
+        }`}>
+          <div className="flex items-center space-x-3">
+            {toast.type === 'success' ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
